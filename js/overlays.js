@@ -16,6 +16,7 @@ function headMenu(anchor) {
     { label: ch.locked ? 'Unlock chat' : 'Lock chat', icon: 'lock', onClick: () => toggleLock(ch) },
     { label: 'Starred messages', icon: 'star', onClick: () => openDrawer('starred') },
     { label: ch.muted ? 'Unmute notifications' : 'Mute notifications', icon: 'mute', onClick: () => { ch.muted = !ch.muted; save(); refreshSidebar(); renderDrawer(); toast(ch.muted ? 'Notifications muted' : 'Notifications unmuted'); } },
+    ...extraHeadItems(ch),
     '-',
     { label: 'Clear chat', icon: 'delete', onClick: () => clearChat(ch) },
     c && { label: c.blocked ? 'Unblock' : 'Block', icon: 'block', danger: true, onClick: () => toggleBlock(c) },
@@ -121,7 +122,7 @@ function renderStory() {
     <div class="story-head">${avatarHTML(o.who, 40)}<div class="grow"><div class="sh-name">${o.mine ? 'My status' : esc(o.who.name)}${o.ref?.business ? ' · <span class="pill biz">Business</span>' : ''}</div><div class="sh-time">${listTime(it.t)}${it.privacy ? ' · ' + privacyLabel(it.privacy) : ''}</div></div>
       ${o.mine ? `<button class="icon-btn light" data-act="story-delete" aria-label="Delete status">${icon('delete')}</button>` : ''}<button class="icon-btn light" data-act="story-close" aria-label="Close">${icon('close')}</button></div>
     <div class="story-stage" style="background:${it.type === 'text' ? it.bg : '#000'}">
-      ${it.type === 'text' ? `<div class="story-text">${fmtText(it.text)}</div>` : it.src ? `<img src="${it.src}" alt="">` : `<div class="story-art" style="background:${it.art.bg}"><span>${it.art.emoji}</span></div>`}
+      ${it.type === 'voice' ? voiceStoryHTML(it) : it.type === 'text' ? `<div class="story-text">${fmtText(it.text)}</div>` : it.src ? `<img src="${it.src}" alt="">` : `<div class="story-art" style="background:${it.art.bg}"><span>${it.art.emoji}</span></div>`}
       ${it.caption ? `<div class="story-caption">${esc(it.caption)}</div>` : ''}
       <button class="story-nav prev" data-act="story-prev" aria-label="Previous"></button><button class="story-nav next" data-act="story-next" aria-label="Next"></button>
     </div>
@@ -225,7 +226,7 @@ function renderCall() {
   if (!el) { el = document.createElement('div'); el.id = 'call'; el.className = 'call'; overlayRoot.appendChild(el); }
   const title = call.room ? 'WHATSMORE Call Room' : chatTitle(call.ch);
   const label = { calling: 'Calling…', ringing: 'Ringing…', waiting: 'Waiting for others to join…', connected: call.start ? fmtDur((Date.now() - call.start) / 1000) : '0:00' }[call.state];
-  const all = call.room ? call.joined : call.ch.type === 'group' ? call.ch.members : [];
+  const all = (call.room ? call.joined : call.ch.type === 'group' ? call.ch.members : []).filter((id) => !(call.removed || []).includes(id));
   const people = all.slice(0, 11), extra = all.length - people.length;
   const grid = people.length > 0 && call.state === 'connected';
   el.innerHTML = `
@@ -235,6 +236,7 @@ function renderCall() {
       grid ? `<div class="call-grid-wrap"><div class="call-title">${esc(title)} · <span id="call-status">${label}</span></div><div class="call-grid">${people.map((id) => `<div class="tile">${avatarHTML(contact(id), 84)}<span>${esc(contact(id).name)}</span><span class="tile-mic">${icon('mic', 14)}</span></div>`).join('')}${extra > 0 ? `<div class="tile more"><b>+${extra.toLocaleString()}</b><span>more in call</span></div>` : ''}</div></div>` :
       `<div class="call-hero">${call.room ? `<div class="action-ic big">${icon('link', 40)}</div>` : chatAvatar(call.ch, 128)}<h2>${esc(title)}</h2><div class="call-status" id="call-status">${label}</div><div class="call-kind">${call.video ? 'WHATSMORE video call' : 'WHATSMORE voice call'}</div></div>`}
       ${call.video ? `<div class="self-view ${call.blur ? 'blur' : ''}">${call.stream && !call.camOff ? '<video id="self-vid" autoplay playsinline muted></video>' : `<div class="self-off">${call.camErr ? 'Camera unavailable' : 'Camera off'}</div>`}<span>You${call.blur ? ' · blur on' : ''}</span></div>` : ''}
+      ${callPlusStageHTML(call)}
     </div>
     <div class="call-controls">
       <button class="cbtn ${call.muted ? 'on' : ''}" data-act="call-mute" title="${call.muted ? 'Unmute' : 'Mute'}" aria-label="Mute">${icon(call.muted ? 'micoff' : 'mic')}</button>
@@ -242,6 +244,7 @@ function renderCall() {
       ${call.video ? `<button class="cbtn ${call.blur ? 'on' : ''}" data-act="call-blur" title="Background blur" aria-label="Background blur">${icon('blur')}</button>` : ''}
       <button class="cbtn ${call.screen ? 'on' : ''}" data-act="call-screen" title="Share screen" aria-label="Share screen">${icon('screen')}</button>
       ${call.room ? `<button class="cbtn" data-act="call-copylink" title="Copy link" aria-label="Copy call link">${icon('link')}</button>` : ''}
+      ${callPlusButtonsHTML(call)}
       <button class="cbtn end" data-act="call-end" title="End call" aria-label="End call">${icon('callend')}</button>
     </div>`;
   const sv = $('#self-vid'); if (sv && call.stream) sv.srcObject = call.stream;

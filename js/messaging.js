@@ -28,7 +28,7 @@ function progressTicks(ch, m) {
   const c = ch.type === 'direct' ? contact(ch.contactId) : null;
   if (c?.blocked) return;
   setTimeout(() => { if (m.status === 'sent') { m.status = 'delivered'; refreshMsg(ch); } }, 700);
-  if (S.settings.privacy.readReceipts && (ch.type === 'group' || c?.online || c?.business)) setTimeout(() => { m.status = 'read'; refreshMsg(ch); }, 1900);
+  if (S.settings.privacy.readReceipts && !ch.privacy?.hideReceipts && (ch.type === 'group' || c?.online || c?.business)) setTimeout(() => { m.status = 'read'; refreshMsg(ch); }, 1900);
 }
 function refreshMsg(ch) { save(); if (ch.id === ui.active) renderMessages({ keep: true }); refreshSidebar(); }
 
@@ -422,6 +422,9 @@ function summarize(ch) {
     polls: msgs.filter((m) => m.type === 'poll').map((m) => { const best = m.options.map((o, i) => [o, (m.votes[i] || []).length]).sort((a, b) => b[1] - a[1])[0]; return `“${m.question}” — leading: ${best[0]} (${best[1]} vote${best[1] === 1 ? '' : 's'})`; }),
     pays: msgs.filter((m) => m.type === 'payment').map((m) => `${senderName(m.from)} ${m.kind === 'request' ? 'requested' : 'sent'} ${money(m.amount)}${m.note ? ' — ' + m.note : ''} (${m.status})`),
     files: msgs.filter((m) => m.type === 'doc').map((m) => m.name),
+    links: [...new Set(lines.flatMap((l) => (l.m.type === 'text' ? l.m.text.match(/https?:\/\/[^\s<]+/g) || [] : [])))].slice(-6),
+    mentions: [...new Set(lines.flatMap((l) => (l.m.type === 'text' ? (l.m.text.match(/@[a-z0-9._]{3,}/gi) || []).map((x) => x.toLowerCase()) : [])))],
+    actions: grab(/please|pls|need to|can you|could you|will you|by (monday|tuesday|wednesday|thursday|friday|saturday|sunday|tonight|tomorrow)|review|pay your|send|bring|share/i).map((l) => ({ ...l, who: firstName(l.m.from) })),
   };
 }
 function aiSummaryModal(ch) {
@@ -440,6 +443,9 @@ function aiSummaryModal(ch) {
       ${sec('📊', 'Polls', s.polls.map((p) => `<li>${esc(p)}</li>`).join(''))}
       ${sec('💳', 'Payments', s.pays.map((p) => `<li>${esc(p)}</li>`).join(''))}
       ${sec('📎', 'Shared files', s.files.map((p) => `<li>${esc(p)}</li>`).join(''))}
+      ${sec('🔗', 'Important links', s.links.map((p) => `<li><a href="${esc(p)}" target="_blank" rel="noopener noreferrer">${esc(p)}</a></li>`).join(''))}
+      ${sec('👤', 'Mentioned people', s.mentions.map((p) => `<li>${esc(p)}</li>`).join(''))}
+      ${sec('🎯', 'Action items', s.actions.map((l) => `<li><b>${esc(l.who)}</b> raised: ${esc(l.s)}</li>`).join(''))}
       <div class="hint-box">${icon('sparkle', 16)}<span>Demo summary generated on your device with simple rules. A production build would use an on-device or privacy-preserving AI model so encrypted chats stay private.</span></div>`,
     actions: [{ label: 'Done', primary: true }],
   });

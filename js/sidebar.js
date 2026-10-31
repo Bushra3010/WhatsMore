@@ -46,7 +46,7 @@ function tabChats() {
 
 function chatListHTML(mode) {
   const q = ui.search.trim().toLowerCase();
-  let list = S.chats.filter((c) => (mode === 'archived' ? c.archived && !c.locked : mode === 'locked' ? c.locked : !c.archived && !c.locked));
+  let list = S.chats.filter((c) => (mode === 'archived' ? c.archived && !c.locked : mode === 'locked' ? c.locked : !c.archived && !c.locked)).filter((c) => mode || profileMatch(c));
   if (!mode) {
     if (ui.filter === 'unread') list = list.filter((c) => c.unread > 0);
     if (ui.filter === 'groups') list = list.filter((c) => c.type === 'group');
@@ -253,7 +253,7 @@ function tabCommunities() {
 }
 
 // ---------- files / cloud
-const FILECATS = [['all', 'All'], ['photos', 'Photos'], ['videos', 'Videos'], ['documents', 'Documents'], ['receipts', 'Receipts'], ['invoices', 'Invoices'], ['audio', 'Audio']];
+const FILECATS = [['all', 'All'], ['photos', 'Photos'], ['videos', 'Videos'], ['documents', 'Documents'], ['receipts', 'Receipts'], ['invoices', 'Invoices'], ['audio', 'Audio'], ['links', 'Links']];
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 function fileCat(m) {
   if (m.type === 'image') return 'photos';

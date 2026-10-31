@@ -158,10 +158,10 @@ function msgMenu(mid, anchor) {
   const ch = chatById(ui.active), m = ch?.messages.find((x) => x.id === mid);
   if (!m || m.type === 'system') return;
   const out = m.from === 'me', alive = m.type !== 'deleted';
-  const fwdable = alive && !['payment', 'poll', 'invoice', 'call', 'event'].includes(m.type);
+  const fwdable = alive && !['payment', 'poll', 'invoice', 'call', 'event'].includes(m.type) && !noForward(ch);
   showMenu(anchor, [
     alive && { label: 'Reply', icon: 'reply', onClick: () => { ui.replyTo = mid; ui.editing = null; renderReplyBox(); renderSmart(); focusInput(); } },
-    alive && (m.text || m.caption) && m.type !== 'sticker' && { label: 'Copy', icon: 'copy', onClick: () => copyText(m.text || m.caption) },
+    alive && (m.text || m.caption) && m.type !== 'sticker' && !noForward(ch) && { label: 'Copy', icon: 'copy', onClick: () => copyText(m.text || m.caption) },
     fwdable && { label: 'Forward', icon: 'forward', onClick: () => forwardModal(m) },
     alive && { label: m.pinned ? 'Unpin' : 'Pin', icon: 'pin', onClick: () => { m.pinned = !m.pinned; save(); renderBars(); renderMessages({ keep: true }); toast(m.pinned ? 'Message pinned' : 'Message unpinned'); } },
     alive && { label: m.starred ? 'Unstar' : 'Star', icon: 'star', onClick: () => { m.starred = !m.starred; save(); renderMessages({ keep: true }); } },
@@ -193,12 +193,13 @@ function chatPicker(title, cb, opts = {}) {
   modal({
     title,
     body: `<div class="search modal-search">${icon('search', 18)}<input id="pk-q" placeholder="Search chats" autocomplete="off"></div><div class="pick-list">${chats.map((c) => `<label class="chat-item check-row" data-name="${esc(chatTitle(c).toLowerCase())}">${chatAvatar(c, 40)}<div class="ci-body"><div class="ci-name">${esc(chatTitle(c))}</div></div><input type="${opts.single ? 'radio' : 'checkbox'}" name="pk" class="check" value="${c.id}"></label>`).join('')}</div>`,
-    actions: [{ label: 'Cancel' }, { label: opts.label || 'Send', primary: true, onClick: (root) => { const ids = $$('input[name=pk]:checked', root).map((i) => i.value); if (!ids.length) { toast('Select at least one chat'); return false; } cb(ids.map(chatById)); } }],
+    actions: [{ label: 'Cancel' }, { label: opts.label || 'Send', primary: true, onClick: (root) => { const ids = $$('input[name=pk]:checked', root).map((i) => i.value); if (!ids.length) { toast('Select at least one chat'); return false; } if (cb(ids.map(chatById)) === false) return false; } }],
     onMount: (root) => $('#pk-q', root).addEventListener('input', (e) => { const q = e.target.value.toLowerCase(); $$('.pick-list .chat-item', root).forEach((r) => { r.hidden = !r.dataset.name.includes(q); }); }),
   });
 }
 function forwardModal(m) {
   chatPicker('Forward message to…', (chats) => {
+    if (chats.length > FORWARD_LIMIT) { toast(`You can forward to up to ${FORWARD_LIMIT} chats at once`); return false; }
     chats.forEach((ch) => {
       const copy = JSON.parse(JSON.stringify(m));
       ['id', 'from', 't', 'status', 'reactions', 'starred', 'pinned', 'replyTo', 'edited', 'exp', 'bot', 'scheduled'].forEach((k) => delete copy[k]);

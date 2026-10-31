@@ -45,6 +45,23 @@ Everything you do is saved in your browser. Use **Settings → Reset demo data**
 | **Anti-scam AI** 🛡️ | *KYC Update Desk* chat: warnings that list the reasons, a confirmation before links open, and report & block. |
 | **More** | Voice → text transcripts, read aloud (text-to-voice), translating a message to any language, multiple profiles, AI memory controls, notification categories, chat import (from exported .txt). |
 
+## New in v3 (product blueprint gaps)
+
+| Blueprint item | Try this |
+|---|---|
+| **Sign-up flow** (Stage 2 UI) | Shown on first launch: splash → phone or email → OTP (demo code on screen) → name and unique **@username** with suggestions → hide phone number → security. Replay it from **Settings → Replay welcome & sign-up**. Only a masked number is kept. |
+| **Secret chat** (§1) | **New chat → New secret chat**, or **⋮ → Start secret chat**. Device-only, no forwarding or copying, disappears in 24 h, hidden when you switch away, and screenshot alerts (best-effort: browsers only see some screenshot shortcuts). |
+| **Chat privacy & forwarding controls** (§1) | **⋮ → Chat privacy**: turn off forwarding and copying, screenshot alerts, hide read receipts or last seen for one chat. Forwarding is limited to 5 chats at a time. |
+| **Two-way live translation** (§3) | **⋮ → Live translation** in Ramesh's chat (you Telugu ⇄ them English), then send “ఎలా ఉన్నారు?”. They read “How are you?” and their English reply reaches you in Telugu. |
+| **AI summary + photo enhance** (§2) | Summaries now list important links, mentioned people and action items. Message menu on any real photo → **Enhance with AI**. |
+| **Super calling** (§11) | In any call: **CC** live captions (tap 🌐 to translate them into Telugu or Hindi), consent-based **recording** (saved to the chat), and a **participants** panel with mute-all, lock, waiting room and remove. **Calls → Schedule a meeting**. |
+| **Voice status** (§13) | **Status → 🎤** records up to 60 seconds. Siva has posted a voice status. |
+| **Cloud** (§14) | **Files**: smart folders (Aadhaar, PAN, Education, Business, Bills · Family, Travel, Work, Events), a **Links** tab, duplicate clean-up, encrypted backup. |
+| **Separate profiles** (§16) | Home → profile pill → **Business**: only customer chats, and other profiles' messages arrive as quiet notices. |
+| **SOS audio** (§7) | Emergency SOS → *Record 15 seconds of audio* (off by default). |
+| **Learn from your PDF** (§9) | WHATSMORE Learn → **Upload a chapter**, then **Explain in simple Telugu** or **Create 20 multiple-choice questions**. |
+| **Marketplace & Admin** (§5, admin panel) | Digital products and professional services categories. Admin adds user management, payment monitoring, subscriptions and API management. |
+
 ## Important: this is a prototype
 
 - **Other people are simulated.** Replies, typing indicators, votes and payments come from scripted bots. There is no backend and no real network messaging.
@@ -59,6 +76,7 @@ Everything you do is saved in your browser. Use **Settings → Reset demo data**
 index.html          App shell
 css/styles.css      WhatsApp-style theme (light + dark), mobile layout
 css/more.css        Styles for the v2 features
+css/blueprint.css   Styles for the v3 blueprint features
 js/icons.js         SVG icon set
 js/data.js          Demo seed data (contacts, chats, stories, catalogue…)
 js/core.js          State, storage, helpers, menus, modals, toasts
@@ -71,5 +89,9 @@ js/overlays.js      Info drawer, stories viewer, calls, media viewer
 js/docs.js          Any file type, document viewer, Document Studio (AI correction), digital signatures
 js/devices.js       Linked devices, multi-tab sync, anti-scam AI, voice AI, translation, data migration
 js/modules.js       Home, WHATSMORE AI, Services hub and all super-app modules, profiles, chat import
+js/privacy.js       Secret chat, chat privacy, forwarding limits, two-way live translation, profiles, photo enhance
+js/callsplus.js     Live captions, call recording with consent, host controls, waiting room, meeting scheduling
+js/cloudplus.js     Smart folders, links, duplicates, backup, voice status, SOS audio, Learn PDF, marketplace & admin extras
+js/onboarding.js    Splash, login/registration with OTP, username creation
 js/main.js          Event wiring and startup
 ```

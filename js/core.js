@@ -124,14 +124,14 @@ function contact(id) {
 }
 const person = (id) => contact(id) || S.directory.find((u) => u.id === id);
 const chatById = (id) => S.chats.find((c) => c.id === id);
-const chatTitle = (ch) => (ch.type === 'direct' ? contact(ch.contactId)?.name || 'Unknown' : ch.name);
+const chatTitle = (ch) => (ch.secret ? '🔒 ' : '') + (ch.type === 'direct' ? contact(ch.contactId)?.name || 'Unknown' : ch.name);
 const senderName = (id) => (id === 'me' ? 'You' : person(id)?.name || 'Unknown');
 const firstName = (id) => (id === 'me' ? 'You' : senderName(id).split(' ')[0]);
 const lastMsg = (ch) => ch.messages[ch.messages.length - 1];
 const lastTime = (ch) => lastMsg(ch)?.t || 0;
 const isBiz = (ch) => ch.type === 'direct' && !!contact(ch.contactId)?.business;
 const isAdmin = (ch) => ch.type === 'group' && (ch.admins || []).includes('me');
-const directChatFor = (cid) => S.chats.find((c) => c.type === 'direct' && c.contactId === cid);
+const directChatFor = (cid) => S.chats.find((c) => c.type === 'direct' && c.contactId === cid && !c.secret);
 const productById = (pid) => Object.values(S.catalog).flat().find((p) => p.id === pid);
 const allUsernames = () => [...S.contacts, ...S.directory].map((u) => u.username);
 

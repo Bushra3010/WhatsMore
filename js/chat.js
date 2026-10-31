@@ -149,7 +149,7 @@ function contentHTML(ch, m, q, jumbo) {
   switch (m.type) {
     case 'text':
       if (jumbo) return `<div class="jumbo">${esc(m.text)}</div>`;
-      return `${out ? '' : scamWarningHTML(m)}<div class="text">${fmtText(m.text, q)}${m.tr && (ch.translate || S.settings.autoTranslate) ? `<span class="tr"><span class="tr-label">${icon('translate', 12)} Translated from ${LANGS[contact(m.from)?.lang] || 'another language'}</span>${fmtText(m.tr, q)}</span>` : ''}${spacer}</div>`;
+      return `${out ? '' : scamWarningHTML(m)}<div class="text">${fmtText(m.text, q)}${m.tr && (ch.translate || S.settings.autoTranslate) ? `<span class="tr"><span class="tr-label">${icon('translate', 12)} Translated from ${LANGS[contact(m.from)?.lang] || 'another language'}</span>${fmtText(m.tr, q)}</span>` : ''}${liveTrHTML(ch, m)}${spacer}</div>`;
     case 'deleted': return `<div class="text deleted">${icon('block', 15)} ${out ? 'You deleted this message' : 'This message was deleted'}${spacer}</div>`;
     case 'sticker': return `<div class="jumbo sticker">${esc(m.text)}</div>`;
     case 'gif': return `<div class="gif" style="background:${m.gif.bg}"><span class="anim-${m.gif.anim}">${m.gif.e}</span><b>${esc(m.gif.label)}</b><span class="gif-tag">GIF</span></div>`;

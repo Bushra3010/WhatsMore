@@ -198,7 +198,7 @@ const PHRASES = {
   'see you soon': { te: 'త్వరలో కలుద్దాం', hi: 'जल्द मिलते हैं', ta: 'விரைவில் சந்திப்போம்', kn: 'ಬೇಗ ಭೇಟಿಯಾಗೋಣ', ml: 'ഉടൻ കാണാം', mr: 'लवकरच भेटू', bn: 'শীঘ্রই দেখা হবে', gu: 'જલ્દી મળીએ', pa: 'ਜਲਦੀ ਮਿਲਦੇ ਹਾਂ', or: 'ଶୀଘ୍ର ଦେଖା ହେବ', ur: 'جلد ملتے ہیں', ar: 'أراك قريبًا', fr: 'À bientôt', es: 'Hasta pronto', de: 'Bis bald', zh: '回头见', ja: 'またね' },
   'where are you': { te: 'మీరు ఎక్కడ ఉన్నారు?', hi: 'आप कहाँ हैं?', ta: 'நீங்கள் எங்கே இருக்கிறீர்கள்?', kn: 'ನೀವು ಎಲ್ಲಿದ್ದೀರಿ?', ml: 'നിങ്ങൾ എവിടെയാണ്?', mr: 'तुम्ही कुठे आहात?', bn: 'আপনি কোথায়?', gu: 'તમે ક્યાં છો?', pa: 'ਤੁਸੀਂ ਕਿੱਥੇ ਹੋ?', or: 'ଆପଣ କେଉଁଠି ଅଛନ୍ତି?', ur: 'آپ کہاں ہیں؟', ar: 'أين أنت؟', fr: 'Où es-tu ?', es: '¿Dónde estás?', de: 'Wo bist du?', zh: '你在哪里？', ja: 'どこにいますか？' },
 };
-const normPhrase = (s) => String(s).toLowerCase().replace(/\p{Extended_Pictographic}|[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
+const normPhrase = (s) => String(s).toLowerCase().replace(/\p{Extended_Pictographic}|[^\p{L}\p{M}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
 // Returns { text } or null when the phrase isn't in the demo phrasebook
 function translateText(text, to) {
   const n = normPhrase(text);
