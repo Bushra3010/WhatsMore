@@ -103,7 +103,7 @@ function settingsPage(p) {
       <div class="storage pad"><div class="storage-top"><span>Used</span><span>${fmtSize(used)} of ${PLANS[st.plan].quota}</span></div><div class="meter"><div style="width:${Math.max(2, (used / PLANS[st.plan].bytes) * 100)}%"></div></div>
       <div class="cat-counts">${FILECATS.slice(1).map(([k, l]) => `<span>${l}: <b>${byCat[k] || 0}</b></span>`).join('')}</div></div>
       <div class="list-label">Plans</div>
-      <div class="plans">${Object.entries(PLANS).map(([k, p]) => `<div class="plan ${st.plan === k ? 'on' : ''}"><div class="plan-name">${p.name}</div><div class="plan-q">${p.quota}</div><div class="ci-sub">${p.price}</div>${st.plan === k ? '<span class="pill">Current</span>' : `<button class="btn sm" data-act="chooseplan" data-plan="${k}">Choose</button>`}</div>`).join('')}</div>
+      <div class="plans">${Object.entries(PLANS).map(([k, p]) => `<div class="plan ${st.plan === k ? 'on' : ''}"><div class="plan-name">${p.name}</div><div class="plan-q">${p.quota}</div><div class="ci-sub">${p.price}</div>${p.perk ? `<div class="plan-perk">${p.perk}</div>` : ''}${st.plan === k ? '<span class="pill">Current</span>' : `<button class="btn sm" data-act="chooseplan" data-plan="${k}">Choose</button>`}</div>`).join('')}</div>
     </div>`;
     }
 

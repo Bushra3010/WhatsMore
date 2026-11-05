@@ -73,6 +73,25 @@ Everything you do is saved in your browser. Use **Settings → Reset demo data**
 | **Add people to a call** ➕ | In a 1:1 call, tap the add-person button. It becomes a group call, with no limit on participants. |
 | **Account recovery** 🔑 | **Settings → Account & security → Account recovery**: a recovery key (shown once, downloadable; only its SHA-256 fingerprint is stored), a recovery email (code check) and 2–5 trusted contacts. On the sign-in screen, **Lost access? Recover account** lets you recover with the key, codes from 2 trusted contacts, or email. Recovering logs out every other session and device. |
 
+## New in v5 (Telugu world-class blueprint gaps)
+
+| Blueprint item | Try this |
+|---|---|
+| **Home bar** (§2) | Home now has 🔍 Search, a 🔔 **notification center** (filter by Messages, Calls, Payments, Business, Marketplace, Community, AI, Security, Services) and the profile switcher. The greeting follows your language (Telugu: “శుభోదయం”). |
+| **Location sharing** (§3) | **+ → Location**: send your current location, a nearby place, or **live location** for 15 min / 1 h / 8 h (with **Stop sharing**). Opens in OpenStreetMap. |
+| **Who can reach me** (§5) | **Settings → Privacy**: who can message me, call me, and add me to groups. |
+| **Group live translation** (§10) | In *Weekend Trip*: **⋮ → Live translation**, then send “ఎలా ఉన్నారు?”. Members read it in English and Hindi, and Priya's Hindi and Arjun's English replies reach you in Telugu. |
+| **Meeting chat & summary** (§12) | In a group call or call room, tap 💬 for **meeting chat**. When the call ends, an **AI meeting summary** (people, what was discussed, action items, chat) is posted to the chat. |
+| **Link & location status** (§13) | **Status → New status → Link / Location**. |
+| **Seller dashboard** (§18) | **Marketplace → Seller dashboard**: sales, inventory with stock controls and low-stock alerts, orders (Packed → Shipped → Delivered), customers, promotions (coupon codes) and payouts. |
+| **Do Not Disturb** (§28) | **Digital Wellbeing → Do Not Disturb** with schedules (always, nights, work hours, weekends). Silenced notifications still go to the notification center. |
+| **Your data & privacy** (§35) | **Settings → Your data & privacy**: download your data (JSON), AI, location, contacts, camera, mic and cloud permissions, devices and sessions, **My reports**, and **Delete my account**. |
+| **Report anything** (§41) | Report a **message** (message menu), **user / business** (contact info), **group** (group info), **channel** (News) or a **scam** (Your data & privacy), using these categories: Spam, Harassment, Fraud, Impersonation, Illegal content, Security concern, Other. Reports appear in the admin queue. |
+| **Creator verified** (§42) | A new badge in News & Channels (*TechGuru Kiran*). |
+| **Plans** (§44) | Free, **WHATSMORE Plus**, Business, **Business Pro**, Enterprise. |
+| **Command Center** (§36–40) | Admin adds **global regions** (India, Asia, Europe, North America), **disaster recovery** (RPO/RTO, replication, a **Run drill** button), **AI monitoring** (requests, latency, model routing through an AI gateway) and **developer health**. |
+| **Languages** (§52) | Translate menus list 110+ languages. The demo phrasebook translates common phrases in the Indian languages. |
+
 ## Important: this is a prototype
 
 - **Other people are simulated.** Replies, typing indicators, votes and payments come from scripted bots. There is no backend and no real network messaging.
@@ -104,6 +123,7 @@ js/privacy.js       Secret chat, chat privacy, forwarding limits, two-way live t
 js/callsplus.js     Live captions, call recording with consent, host controls, waiting room, meeting scheduling
 js/callsx.js        Camera switching, virtual backgrounds, audio/video quality, call waiting & hold, add people to a call
 js/recovery.js      Account recovery: recovery key, recovery email, trusted contacts, recover from sign-in
+js/superapp.js      v5: home bar & notification center, location sharing, reach controls, group live translation, meeting chat & summary, seller dashboard, DND, data & privacy, reporting, plans, admin regions/DR/AI monitoring
 js/cloudplus.js     Smart folders, links, duplicates, backup, voice status, SOS audio, Learn PDF, marketplace & admin extras
 js/onboarding.js    Splash, login/registration with OTP, username creation
 js/main.js          Event wiring and startup

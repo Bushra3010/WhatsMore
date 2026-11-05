@@ -90,6 +90,7 @@ function renderDrawer() {
   }
   html += `<div class="info-sec list danger">
     ${c ? row('block', 'block', c.blocked ? 'Unblock ' + esc(c.name) : 'Block ' + esc(c.name)) + row('report', 'info', 'Report ' + esc(c.name)) : ''}
+    ${ch.type === 'group' ? row('reportgroup', 'info', 'Report group') : ''}
     ${ch.type === 'group' && !ch.left ? row('exitgroup', 'logout', 'Exit group') : ''}
     ${row('deletechat', 'delete', 'Delete chat')}
   </div>`;
@@ -163,16 +164,20 @@ function addStatusModal() {
   let bg = bgs[0], photo = null;
   modal({
     title: 'New status',
-    body: `<div class="seg"><button class="on" data-st="text">Text</button><button data-st="photo">Photo</button></div>
+    body: `<div class="seg"><button class="on" data-st="text">Text</button><button data-st="photo">Photo</button><button data-st="link">Link</button><button data-st="location">Location</button></div>
       <div id="st-text-wrap"><textarea id="st-text" class="status-compose" style="background:${bg}" rows="4" maxlength="400" placeholder="Type a status" autofocus></textarea>
       <div class="swatches">${bgs.map((c, i) => `<button class="swatch ${i === 0 ? 'on' : ''}" style="background:${c}" data-bg="${c}" aria-label="Background ${c}"></button>`).join('')}</div></div>
       <div id="st-photo-wrap" hidden><div class="media-preview" id="st-prev"><button class="btn" id="st-pick">${icon('image', 18)} Choose photo</button></div><label class="field"><span>Caption</span><input id="st-cap" maxlength="200"></label></div>
+      <div id="st-link-wrap" hidden><label class="field"><span>Link</span><input id="st-url" type="url" placeholder="https://" autocomplete="off"></label><label class="field"><span>Say something about it</span><input id="st-ltitle" maxlength="120"></label></div>
+      <div id="st-location-wrap" hidden><label class="field"><span>Place</span><input id="st-place" maxlength="80" placeholder="e.g. Inorbit Mall, Madhapur"></label><button class="btn sm" id="st-here">${icon('place', 16)} Use my current location</button></div>
       <label class="field"><span>Who can see this?</span><select id="st-priv">${PRIVACY_OPTS.map(([v, l]) => `<option value="${v}" ${v === S.settings.privacy.status ? 'selected' : ''}>${l}</option>`).join('')}</select></label>`,
     actions: [{ label: 'Cancel' }, {
       label: 'Post', primary: true, onClick: (root) => {
         const mode = $('.seg .on', root).dataset.st, privacy = $('#st-priv', root).value, t = Date.now();
         let item;
         if (mode === 'text') { const text = $('#st-text', root).value.trim(); if (!text) { toast('Type something first'); return false; } item = { type: 'text', text, bg, t, privacy, views: 0 }; }
+        else if (mode === 'link') { const url = $('#st-url', root).value.trim(), tt = $('#st-ltitle', root).value.trim(); if (!/^https?:\/\/\S+\.\S+/.test(url)) { toast('Enter a link starting with https://'); return false; } item = { type: 'text', text: `🔗 ${tt || 'Check this out'}\n${url}`, link: url, bg, t, privacy, views: 0 }; }
+        else if (mode === 'location') { const place = $('#st-place', root).value.trim(); if (!place) { toast('Add a place'); return false; } item = { type: 'text', text: `📍 ${place}`, bg: '#2e7d32', t, privacy, views: 0 }; }
         else { if (!photo) { toast('Choose a photo'); return false; } item = { type: 'image', src: photo, caption: $('#st-cap', root).value.trim(), t, privacy, views: 0 }; }
         S.myStatus.items.push(item);
         save(); renderSidebar(); toast('Status posted · ' + privacyLabel(privacy));
@@ -181,7 +186,8 @@ function addStatusModal() {
     }],
     onMount: (root) => root.addEventListener('click', async (e) => {
       const s = e.target.closest('[data-st]'), b = e.target.closest('[data-bg]');
-      if (s) { $$('.seg button', root).forEach((x) => x.classList.toggle('on', x === s)); $('#st-text-wrap', root).hidden = s.dataset.st !== 'text'; $('#st-photo-wrap', root).hidden = s.dataset.st !== 'photo'; }
+      if (s) { $$('.seg button', root).forEach((x) => x.classList.toggle('on', x === s)); ['text', 'photo', 'link', 'location'].forEach((k) => { $(`#st-${k}-wrap`, root).hidden = s.dataset.st !== k; }); }
+      if (e.target.closest('#st-here')) { const p = await getPosition(); $('#st-place', root).value = p.demo ? 'Gachibowli, Hyderabad' : `Near ${p.lat.toFixed(3)}, ${p.lng.toFixed(3)}`; }
       if (b) { bg = b.dataset.bg; $('#st-text', root).style.background = bg; $$('.swatch', root).forEach((x) => x.classList.toggle('on', x === b)); }
       if (e.target.closest('#st-pick')) {
         const files = await pickFile('file-status');

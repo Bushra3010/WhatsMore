@@ -205,6 +205,7 @@ function preview(m) {
     case 'product': return '🛍️ ' + (productById(m.productId)?.name || 'Product');
     case 'invoice': return '🧾 Invoice ' + m.orderId;
     case 'contact': return '👤 ' + (contact(m.userId)?.name || 'Contact');
+    case 'location': return (m.live ? '📍 Live location' : '📍 ') + (m.live ? '' : m.name || 'Location');
     case 'call': return (m.video ? '📹 Video call' : '📞 Voice call') + (m.missed ? ' · missed' : '');
     case 'deleted': return '🚫 This message was deleted';
     case 'system': return m.text;

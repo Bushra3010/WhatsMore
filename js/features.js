@@ -168,6 +168,7 @@ function msgMenu(mid, anchor) {
     alive && m.tr && { label: ch.translate ? 'Hide translation' : 'Translate', icon: 'translate', onClick: () => A['translate-toggle']() },
     alive && out && m.type === 'text' && Date.now() - m.t < 15 * MIN && { label: 'Edit', icon: 'edit', onClick: () => { ui.editing = mid; ui.replyTo = null; const ta = $('#input'); ta.value = m.text; ta.dispatchEvent(new Event('input', { bubbles: true })); renderReplyBox(); focusInput(); } },
     ...extraMsgItems(ch, m),
+    alive && !out && m.from !== 'system' && { label: 'Report', icon: 'warning', onClick: () => reportMessage(ch, m) },
     { label: 'Delete', icon: 'delete', danger: true, onClick: () => deleteMsgModal(ch, m) },
   ], {
     alignLeft: !out,
@@ -222,6 +223,7 @@ function attachMenu(anchor) {
     { label: 'Poll', icon: 'poll', color: '#ffbc38', onClick: () => pollModal(ch) },
     { label: 'Event', icon: 'event', color: '#ff2e74', onClick: () => eventModal(ch) },
     { label: 'Contact', icon: 'person', color: '#009de2', onClick: () => shareContactModal(ch) },
+    { label: 'Location', icon: 'place', color: '#1fa855', onClick: () => locationModal(ch) },
     isBiz(ch) && { label: 'Catalogue', icon: 'bag', color: '#f4511e', onClick: () => catalogModal(ch) },
     { label: 'Schedule message', icon: 'timer', color: '#02a698', onClick: () => scheduleModal(ch) },
   ], { above: true, alignLeft: true, cls: 'attach' });
