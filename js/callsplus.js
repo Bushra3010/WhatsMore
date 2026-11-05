@@ -9,7 +9,7 @@ const CC_SCRIPT = [
   { en: 'Great, thank you everyone!', te: 'చాలా బాగుంది, అందరికీ ధన్యవాదాలు!', hi: 'बहुत बढ़िया, सभी को धन्यवाद!' },
 ];
 const CC_LANGS = [['en', 'English'], ['te', 'తెలుగు'], ['hi', 'हिंदी']];
-const callPeople = (call) => (call.room ? call.joined : call.ch?.type === 'group' ? call.ch.members : call.ch ? [call.ch.contactId] : []).filter((id) => !(call.removed || []).includes(id));
+const callPeople = (call) => (call.room ? call.joined : call.ch?.type === 'group' ? call.ch.members : call.ch ? [call.ch.contactId, ...(call.added || [])] : []).filter((id) => !(call.removed || []).includes(id));
 const isHost = (call) => !!call.room || (call.ch?.type === 'group' ? isAdmin(call.ch) : true);
 
 function callPlusStageHTML(call) {

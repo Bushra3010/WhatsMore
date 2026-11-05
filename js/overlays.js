@@ -224,9 +224,9 @@ function renderCall() {
   let el = $('#call');
   if (!call) { el?.remove(); return; }
   if (!el) { el = document.createElement('div'); el.id = 'call'; el.className = 'call'; overlayRoot.appendChild(el); }
-  const title = call.room ? 'WHATSMORE Call Room' : chatTitle(call.ch);
+  const title = call.room ? 'WHATSMORE Call Room' : call.added?.length ? `Group call · ${chatTitle(call.ch)} + ${call.added.length}` : chatTitle(call.ch);
   const label = { calling: 'Calling…', ringing: 'Ringing…', waiting: 'Waiting for others to join…', connected: call.start ? fmtDur((Date.now() - call.start) / 1000) : '0:00' }[call.state];
-  const all = (call.room ? call.joined : call.ch.type === 'group' ? call.ch.members : []).filter((id) => !(call.removed || []).includes(id));
+  const all = (call.room ? call.joined : call.ch.type === 'group' ? call.ch.members : call.added?.length ? [call.ch.contactId, ...call.added] : []).filter((id) => !(call.removed || []).includes(id));
   const people = all.slice(0, 11), extra = all.length - people.length;
   const grid = people.length > 0 && call.state === 'connected';
   el.innerHTML = `
@@ -235,13 +235,14 @@ function renderCall() {
       ${call.screen ? `<video id="screen-vid" autoplay playsinline muted></video><div class="screen-label">${icon('screen', 16)} You are presenting · <span id="call-status">${label}</span></div>` :
       grid ? `<div class="call-grid-wrap"><div class="call-title">${esc(title)} · <span id="call-status">${label}</span></div><div class="call-grid">${people.map((id) => `<div class="tile">${avatarHTML(contact(id), 84)}<span>${esc(contact(id).name)}</span><span class="tile-mic">${icon('mic', 14)}</span></div>`).join('')}${extra > 0 ? `<div class="tile more"><b>+${extra.toLocaleString()}</b><span>more in call</span></div>` : ''}</div></div>` :
       `<div class="call-hero">${call.room ? `<div class="action-ic big">${icon('link', 40)}</div>` : chatAvatar(call.ch, 128)}<h2>${esc(title)}</h2><div class="call-status" id="call-status">${label}</div><div class="call-kind">${call.video ? 'WHATSMORE video call' : 'WHATSMORE voice call'}</div></div>`}
-      ${call.video ? `<div class="self-view ${call.blur ? 'blur' : ''}">${call.stream && !call.camOff ? '<video id="self-vid" autoplay playsinline muted></video>' : `<div class="self-off">${call.camErr ? 'Camera unavailable' : 'Camera off'}</div>`}<span>You${call.blur ? ' · blur on' : ''}</span></div>` : ''}
+      ${call.video ? `<div class="self-view ${call.blur ? 'blur' : ''} ${selfViewFxClass(call)}">${call.stream && !call.camOff ? '<video id="self-vid" autoplay playsinline muted></video>' : `<div class="self-off">${call.camErr ? 'Camera unavailable' : 'Camera off'}</div>`}<span>You${selfViewLabel(call)}</span></div>` : ''}
+      ${callXStageHTML(call)}
       ${callPlusStageHTML(call)}
     </div>
     <div class="call-controls">
       <button class="cbtn ${call.muted ? 'on' : ''}" data-act="call-mute" title="${call.muted ? 'Unmute' : 'Mute'}" aria-label="Mute">${icon(call.muted ? 'micoff' : 'mic')}</button>
       <button class="cbtn ${call.video && !call.camOff ? '' : 'on'}" data-act="call-cam" title="Camera" aria-label="Camera">${icon(call.video && !call.camOff ? 'video' : 'videooff')}</button>
-      ${call.video ? `<button class="cbtn ${call.blur ? 'on' : ''}" data-act="call-blur" title="Background blur" aria-label="Background blur">${icon('blur')}</button>` : ''}
+      ${callXButtonsHTML(call)}
       <button class="cbtn ${call.screen ? 'on' : ''}" data-act="call-screen" title="Share screen" aria-label="Share screen">${icon('screen')}</button>
       ${call.room ? `<button class="cbtn" data-act="call-copylink" title="Copy link" aria-label="Copy call link">${icon('link')}</button>` : ''}
       ${callPlusButtonsHTML(call)}
@@ -270,7 +271,7 @@ function endCall() {
   renderCall();
   if (call.ch) {
     const dur = call.start ? Math.round((Date.now() - call.start) / 1000) : 0;
-    S.calls.push({ id: uid(), chatId: call.ch.id, dir: 'out', video: call.video, t: Date.now(), dur, missed: !dur });
+    S.calls.push({ id: uid(), chatId: call.ch.id, dir: call.dir || 'out', video: call.video, t: Date.now(), dur, missed: !dur });
     sendMsg(call.ch, { type: 'call', video: call.video, dur, missed: !dur });
     if (ui.tab === 'calls') renderSidebar();
   }

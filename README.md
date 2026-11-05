@@ -62,6 +62,17 @@ Everything you do is saved in your browser. Use **Settings → Reset demo data**
 | **Learn from your PDF** (§9) | WHATSMORE Learn → **Upload a chapter**, then **Explain in simple Telugu** or **Create 20 multiple-choice questions**. |
 | **Marketplace & Admin** (§5, admin panel) | Digital products and professional services categories. Admin adds user management, payment monitoring, subscriptions and API management. |
 
+## New in v4 (calling and recovery gaps)
+
+| Feature | Try this |
+|---|---|
+| **Switch camera** 🔄 | In a video call, tap the camera-switch button. It cycles through every camera on the device (front ⇄ rear on phones). |
+| **Virtual backgrounds** 🏖️ | In a video call, tap the effects button: None, Blur, Office, Beach, Library, Space, Sunset, WHATSMORE. (Demo: an approximate portrait cut-out. Production would use on-device person segmentation.) |
+| **HD audio, noise cancellation, echo reduction** 🎙️ | In any call, tap the quality (sliders) button. It shows a live mic level and turns HD audio (48 kHz), noise cancellation, echo reduction, auto volume and HD video on or off. These are real browser settings, and the panel shows what the browser confirmed. |
+| **Call waiting** ⏳ | About 12 seconds into a 1:1 or group call, Ananya calls you. **Decline**, **Message** (“I'm on another call”), **End & answer**, or **Hold & answer**. When a call is on hold, **Swap** switches between the two calls, and ending one brings back the other. Happens once per page load. |
+| **Add people to a call** ➕ | In a 1:1 call, tap the add-person button. It becomes a group call, with no limit on participants. |
+| **Account recovery** 🔑 | **Settings → Account & security → Account recovery**: a recovery key (shown once, downloadable; only its SHA-256 fingerprint is stored), a recovery email (code check) and 2–5 trusted contacts. On the sign-in screen, **Lost access? Recover account** lets you recover with the key, codes from 2 trusted contacts, or email. Recovering logs out every other session and device. |
+
 ## Important: this is a prototype
 
 - **Other people are simulated.** Replies, typing indicators, votes and payments come from scripted bots. There is no backend and no real network messaging.
@@ -91,6 +102,8 @@ js/devices.js       Linked devices, multi-tab sync, anti-scam AI, voice AI, tran
 js/modules.js       Home, WHATSMORE AI, Services hub and all super-app modules, profiles, chat import
 js/privacy.js       Secret chat, chat privacy, forwarding limits, two-way live translation, profiles, photo enhance
 js/callsplus.js     Live captions, call recording with consent, host controls, waiting room, meeting scheduling
+js/callsx.js        Camera switching, virtual backgrounds, audio/video quality, call waiting & hold, add people to a call
+js/recovery.js      Account recovery: recovery key, recovery email, trusted contacts, recover from sign-in
 js/cloudplus.js     Smart folders, links, duplicates, backup, voice status, SOS audio, Learn PDF, marketplace & admin extras
 js/onboarding.js    Splash, login/registration with OTP, username creation
 js/main.js          Event wiring and startup
