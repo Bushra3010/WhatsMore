@@ -13,8 +13,13 @@ function ensureV5() {
   S.reports ||= [];
   if (!S.notifLog) seedNotifs();
   if (!PLANS[st.plan]) st.plan = 'free';
+  // v6 rebrand: move the old green defaults to brand blue
+  if (S.me.color === '#00a884') S.me.color = '#1565d8';
+  S.chats.forEach((c) => { if (c.id === 'ch_project' && c.color === '#00a884') c.color = '#1565d8'; });
 }
-setTimeout(() => { if (S) { ensureV5(); save(); } }, 0);
+// main.js loads the saved data after this file; wait for it, then apply defaults and migrations once
+const v5Init = () => { if (!S) return setTimeout(v5Init, 50); ensureV5(); save(); renderRail(); };
+setTimeout(v5Init, 0);
 
 // ---------- §44 subscription model: Free, Plus, Business, Business Pro, Enterprise
 (() => {

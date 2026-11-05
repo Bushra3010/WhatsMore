@@ -1,6 +1,6 @@
 # WHATSMORE — More Than Chat.
 
-A working, clickable demo of the WHATSMORE chat app with a WhatsApp-style interface. It covers all 10 core features. It runs entirely in the browser: no install, no build step, no server.
+A working, clickable demo of the WHATSMORE super app (chat, AI, calls, pay, business, marketplace, services and community), with the WHATSMORE brand: a tricolour “W” on a blue technology theme. It covers all 10 core features. It runs entirely in the browser: no install, no build step, no server.
 
 ## Run it
 
@@ -92,6 +92,15 @@ Everything you do is saved in your browser. Use **Settings → Reset demo data**
 | **Command Center** (§36–40) | Admin adds **global regions** (India, Asia, Europe, North America), **disaster recovery** (RPO/RTO, replication, a **Run drill** button), **AI monitoring** (requests, latency, model routing through an AI gateway) and **developer health**. |
 | **Languages** (§52) | Translate menus list 110+ languages. The demo phrasebook translates common phrases in the Indian languages. |
 
+## New in v6 (brand design language, §55–56)
+
+- **Logo:** the WHATSMORE “W” in the Indian tricolour (saffron, white, green) on a blue tile. It's used for the app icon (favicon), splash, sign-up, web welcome screen and About page.
+- **Blue theme:** the whole app moved from WhatsApp-style green to a clean blue technology theme, in light and dark mode. Accents, buttons, chat bubbles, badges, dashboards and the call screen are all blue. Payments keep green for money.
+- **Brand message:** “Connect. Communicate. Create. Pay. Work. Discover.” on the splash, and “One App. More Possibilities.” on the web welcome screen, which also has a tricolour bar along the bottom edge.
+- **Existing demo data:** saved data in your browser is updated automatically, so your avatar turns from green to blue.
+
+The logo is drawn in code (`logoSVG` in `js/settings.js`). To use the official logo artwork instead, replace that function and the favicon in `index.html`.
+
 ## Important: this is a prototype
 
 - **Other people are simulated.** Replies, typing indicators, votes and payments come from scripted bots. There is no backend and no real network messaging.
@@ -104,7 +113,7 @@ Everything you do is saved in your browser. Use **Settings → Reset demo data**
 
 ```
 index.html          App shell
-css/styles.css      WhatsApp-style theme (light + dark), mobile layout
+css/styles.css      Base theme: WHATSMORE blue tokens (light + dark), mobile layout
 css/more.css        Styles for the v2 features
 css/blueprint.css   Styles for the v3 blueprint features
 js/icons.js         SVG icon set

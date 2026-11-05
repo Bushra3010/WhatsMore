@@ -160,7 +160,7 @@ function storyReply(text) {
   toast('Reply sent to ' + o.who.name);
 }
 function addStatusModal() {
-  const bgs = ['#5e35b1', '#00a884', '#e91e63', '#0288d1', '#f4511e', '#37474f', '#c2185b'];
+  const bgs = ['#5e35b1', '#1565d8', '#e91e63', '#0288d1', '#f4511e', '#37474f', '#c2185b'];
   let bg = bgs[0], photo = null;
   modal({
     title: 'New status',

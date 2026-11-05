@@ -19,7 +19,7 @@ const GIFS = [
 ];
 
 function emptyMain() {
-  return `<div class="empty-main"><div class="em-logo">${logoSVG(96)}</div><h2>WHATSMORE for Web</h2>
+  return `<div class="empty-main"><div class="em-logo">${logoSVG(96)}</div><h2>WHATSMORE for Web</h2><div class="brand-line">One App. More Possibilities.</div>
     <p>More Than Chat. Message, call, share stories, pay and shop — all in one place.<br>Pick a chat on the left to start.</p>
     <div class="em-feats">${['💬 Private chat', '📞 Calls', '👥 Groups', '📸 Stories', '👤 @username', '🔐 Encryption', '🤖 AI', '☁️ Cloud', '💳 Payments', '💼 Business'].map((f) => `<span>${f}</span>`).join('')}</div>
     <div class="em-foot">${icon('lock', 14)} Your personal messages are end-to-end encrypted</div></div>`;

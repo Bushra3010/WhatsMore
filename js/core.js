@@ -12,7 +12,7 @@ const KEY = 'whatsmore-demo-v1';
 const app = $('#app'), rail = $('#rail'), sidebar = $('#sidebar'), main = $('#main'), drawer = $('#drawer'), overlayRoot = $('#overlay-root');
 
 const LANGS = { te: 'Telugu', hi: 'Hindi' };
-const COLORS = ['#00a884', '#7c4dff', '#e91e63', '#ff9800', '#009688', '#3f51b5', '#f4511e', '#0288d1', '#8e24aa', '#c2185b'];
+const COLORS = ['#1565d8', '#7c4dff', '#e91e63', '#ff9800', '#009688', '#3f51b5', '#f4511e', '#0288d1', '#8e24aa', '#c2185b'];
 const PRIVACY_OPTS = [['everyone', 'Everyone'], ['contacts', 'My contacts'], ['selected', 'Selected contacts'], ['close', 'Close friends'], ['private', 'Only me']];
 const privacyLabel = (v) => (PRIVACY_OPTS.find((p) => p[0] === v) || [0, 'My contacts'])[1];
 const PLANS = {
@@ -331,5 +331,5 @@ function applyTheme() {
   const t = S.settings.theme;
   const dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  $('meta[name=theme-color]').content = dark ? '#202c33' : '#008069';
+  $('meta[name=theme-color]').content = dark ? '#172133' : '#0b3d91';
 }

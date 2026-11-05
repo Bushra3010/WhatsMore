@@ -118,8 +118,11 @@ function settingsPage(p) {
   return extraSettingsPage(p);
 }
 
+let logoN = 0;
+// Brand mark: the WHATSMORE “W” in the Indian tricolour on a blue technology tile
 function logoSVG(size = 48) {
-  return `<svg width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#00a884"/><path d="M17 22l6.5 22L32 28l8.5 16L47 22" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const n = ++logoN;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 64 64" role="img" aria-label="WHATSMORE"><defs><linearGradient id="wmbg${n}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b3d91"/><stop offset="1" stop-color="#1a73e8"/></linearGradient><linearGradient id="wmtri${n}" gradientUnits="userSpaceOnUse" x1="0" y1="20" x2="0" y2="46"><stop offset=".333" stop-color="#ff9933"/><stop offset=".333" stop-color="#ffffff"/><stop offset=".667" stop-color="#ffffff"/><stop offset=".667" stop-color="#1ea31a"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="16" fill="url(#wmbg${n})"/><path d="M14.5 21.5l7.5 23L32 27.5l10 17 7.5-23" fill="none" stroke="url(#wmtri${n})" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 
 function checkUsername(v) {

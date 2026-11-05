@@ -112,7 +112,7 @@ window.WM_SEED = function () {
       ],
     },
     {
-      id: 'ch_project', type: 'group', name: 'Project WHATSMORE 🚀', emoji: '🚀', color: '#00a884', members: ['c_siva', 'c_arjun', 'c_ananya'], admins: ['me', 'c_siva'],
+      id: 'ch_project', type: 'group', name: 'Project WHATSMORE 🚀', emoji: '🚀', color: '#1565d8', members: ['c_siva', 'c_arjun', 'c_ananya'], admins: ['me', 'c_siva'],
       description: 'Core team · MVP planning · More Than Chat.', unread: 0,
       messages: [
         enc(now - 6 * d),
@@ -210,7 +210,7 @@ window.WM_SEED = function () {
 
   return {
     version: 1,
-    me: { id: 'me', name: 'Bushra', username: 'bushra', about: 'Hey there! I am using WHATSMORE.', color: '#00a884' },
+    me: { id: 'me', name: 'Bushra', username: 'bushra', about: 'Hey there! I am using WHATSMORE.', color: '#1565d8' },
     contacts, directory, catalog, chats, communities, statuses, calls,
     myStatus: { items: [] },
     payments: [

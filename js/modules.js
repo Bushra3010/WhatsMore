@@ -88,7 +88,7 @@ function tabHome() {
     <button class="sos-strip" data-act="svc" data-mod="sos">${icon('warning', 18)} <b>SOS</b> · Emergency mode<span class="grow"></span>${icon('chevright', 18)}</button>
     <div class="list-label">For you</div>
     <div class="home-cards">
-      ${card('gotab', 'data-tab="chats"', 'chat', '#00a884', unread ? `${unread} unread message${unread > 1 ? 's' : ''}` : 'You are all caught up', unread ? `In ${unreadChats.length} chat${unreadChats.length > 1 ? 's' : ''} · ${esc(unreadChats.slice(0, 3).map(chatTitle).join(', '))}` : 'No unread chats')}
+      ${card('gotab', 'data-tab="chats"', 'chat', '#1565d8', unread ? `${unread} unread message${unread > 1 ? 's' : ''}` : 'You are all caught up', unread ? `In ${unreadChats.length} chat${unreadChats.length > 1 ? 's' : ''} · ${esc(unreadChats.slice(0, 3).map(chatTitle).join(', '))}` : 'No unread chats')}
       ${sigWait ? card('gochat', `data-chat="${sigWait.c.id}"`, 'draw', '#5e35b1', 'Signature needed', `${esc(senderName(sigWait.m.from))} is waiting for you to sign ${esc(sigWait.m.doc.name)}`) : ''}
       ${scam ? card('gochat', `data-chat="${scam.id}"`, 'warning', '#e53935', 'Possible scam detected', `Anti-scam AI flagged messages from ${esc(chatTitle(scam))}`) : ''}
       ${busy ? card('homesum', `data-chat="${busy.id}"`, 'sparkle', '#7c4dff', 'AI summary ready', `${esc(busy.name)} · ${busy.messages.length} messages summarised for you`) : ''}
@@ -675,7 +675,7 @@ Object.assign(XA, {
 });
 
 // ---------- NEWS & CHANNELS
-const BADGES = { gov: ['Government', '#1565c0'], official: ['Official', '#2e7d32'], news: ['News organisation', '#6d4c41'], verified: ['Verified', '#00a884'], biz: ['Business verified', '#f4511e'] };
+const BADGES = { gov: ['Government', '#1565c0'], official: ['Official', '#2e7d32'], news: ['News organisation', '#6d4c41'], verified: ['Verified', '#1a73e8'], biz: ['Business verified', '#f4511e'] };
 const CHANNELS = [
   { id: 'n1', name: 'India Today Updates', badge: 'news', cat: 'National', followers: '2.4M', posts: ['Parliament winter session to begin on 24 November', 'Monsoon withdraws from the country; IMD forecasts a cold winter'] },
   { id: 'n2', name: 'Telangana Govt Updates', badge: 'gov', cat: 'State', followers: '880K', posts: ['New online portal for income certificates is live', 'Free health camps across all districts this Sunday'] },

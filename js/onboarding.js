@@ -14,7 +14,7 @@ function obSuggest(name) {
 const obDots = (n) => `<div class="ob-dots">${[1, 2, 3, 4, 5].map((i) => `<span class="${i <= n ? 'on' : ''}"></span>`).join('')}</div>`;
 function obScreen() {
   const s = OB.step;
-  if (s === 'splash') return `<div class="ob-splash">${logoSVG(96)}<h1>WHATSMORE</h1><p>More Than Chat</p><div class="ob-pillars">${['💬 Chat', '🤖 AI', '💳 Pay', '💼 Business', '🏛️ Services', '🌍 Community'].map((x) => `<span>${x}</span>`).join('')}</div><div class="ob-load"><div></div></div><div class="ob-foot">${icon('lock', 13)} End-to-end encrypted</div></div>`;
+  if (s === 'splash') return `<div class="ob-splash">${logoSVG(96)}<h1>WHATSMORE</h1><p>More Than Chat</p><div class="tri-bar"></div><div class="brand-line">Connect. Communicate. Create. Pay. Work. Discover.</div><div class="ob-pillars">${['💬 Chat', '🤖 AI', '💳 Pay', '💼 Business', '🏛️ Services', '🌍 Community'].map((x) => `<span>${x}</span>`).join('')}</div><div class="ob-load"><div></div></div><div class="ob-foot">${icon('lock', 13)} End-to-end encrypted</div></div>`;
   if (s === 'welcome') return `<div class="ob-card">${logoSVG(64)}<h2>Welcome to WHATSMORE</h2><p class="muted">Chat. AI. Pay. Business. Services. Community.<br>One secure app for your digital life.</p>
     <label class="field"><span>App language</span><select id="ob-lang">${ONB_LANGS.map(([k, l]) => `<option value="${k}" ${k === (S.settings.myLang || 'en') ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     <button class="btn primary block" data-act="ob" data-go="login" data-via="phone">${icon('phone', 18)} Continue with phone number</button>
