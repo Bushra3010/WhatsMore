@@ -153,5 +153,7 @@ const _tabSettingsOb = tabSettings;
 tabSettings = function () {
   return _tabSettingsOb().replace('<div class="list-row action danger" data-act="resetdemo">', `<div class="list-row action" data-act="replayonboard"><span class="action-ic plain">${icon('person', 22)}</span><div class="grow"><div class="ci-name">Replay welcome & sign-up</div><div class="ci-sub">Splash, login, OTP and username creation</div></div></div><div class="list-row action danger" data-act="resetdemo">`);
 };
-// main.js loads data after this file; show the flow once on first run
-setTimeout(() => { if (S && !S.settings.onboarded) startOnboarding(); }, 0);
+// main.js loads data after this file (and on a slow connection a timer can fire before main.js has even
+// downloaded), so wait until the data is loaded, then show the flow once on first run
+const obInit = () => { if (!S) return setTimeout(obInit, 50); if (!S.settings.onboarded) startOnboarding(); };
+setTimeout(obInit, 0);
