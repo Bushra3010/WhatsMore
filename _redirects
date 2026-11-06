@@ -1,0 +1,4 @@
+# Netlify only (GitHub Pages ignores this file).
+# The live app is hosted on GitHub Pages without a Netlify badge, so send
+# every visitor of the Netlify address there, keeping the path they asked for.
+/*  https://bushra3010.github.io/WhatsMore/:splat  301!
