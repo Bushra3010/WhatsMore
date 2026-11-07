@@ -2,7 +2,7 @@
 // What WHATSMORE users see of the admin side (ported from js/moderation.js): suspension notices,
 // announcements from the Command Center, verified badges on their own profile, and badge requests.
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { S, commit, save, refresh, useRender } from '@/lib/state';
 import { modal, toast } from '@/lib/overlay';
@@ -26,11 +26,23 @@ async function loadAnnouncements() {
 }
 function Announcements() {
   useRender();
+  const ref = useRef<HTMLDivElement>(null);
   const dismissed = S2().dismissedAnn || {};
   const show = MOD.ann.filter((a) => !dismissed[a.id]);
-  if (!show.length) return null;
+  const any = show.length > 0;
+  // tell the layout how tall the banner is, so the app sits below it rather than under it
+  useEffect(() => {
+    const root = document.documentElement;
+    const el = ref.current;
+    if (!any || !el) { root.style.setProperty('--ann-h', '0px'); return; }
+    const set = () => root.style.setProperty('--ann-h', el.offsetHeight + 'px');
+    set();
+    const ro = new ResizeObserver(set); ro.observe(el);
+    return () => { ro.disconnect(); root.style.setProperty('--ann-h', '0px'); };
+  }, [any]);
+  if (!any) return null;
   return (
-    <div id="announce" role="region" aria-label="Announcements">
+    <div id="announce" role="region" aria-label="Announcements" ref={ref}>
       {show.slice(0, 2).map((a) => {
         const [e, cls] = ANN_LEVEL[a.level] || ANN_LEVEL.info;
         return (

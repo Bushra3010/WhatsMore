@@ -90,7 +90,9 @@ test.describe('demo flows', () => {
     const canary = errorCanary(page);
     await openApp(page);
     await openChat(page, 'ch_trip');
-    await page.locator('[data-act="chatsearch"]').first().click();
+    const search = page.locator('[data-act="chatsearch"]:visible');
+    if (await search.count()) await search.first().click();
+    else { await page.locator('.chat-head [data-act="headmenu"]').click(); await page.locator('#menu').getByRole('menuitem', { name: 'Search' }).click(); } // phones: in the ⋮ menu
     await page.locator('#cs-input').fill('car');
     await expect(page.locator('#msgs mark').first()).toBeVisible();
     canary.check();

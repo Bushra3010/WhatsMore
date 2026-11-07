@@ -12,6 +12,9 @@ async function SignedInRedirect() {
   return null;
 }
 
+// Every Command Center page waits for the per-request admin check on the server, by design.
+export const instant = false;
+
 export default function LoginPage() {
   return (
     <Suspense fallback={<div className="login" />}>

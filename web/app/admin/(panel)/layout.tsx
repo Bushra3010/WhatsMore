@@ -8,6 +8,9 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
   return <AdminShell me={me}>{children}</AdminShell>;
 }
 
+// Every Command Center page waits for the per-request admin check on the server, by design.
+export const instant = false;
+
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   return (
     <Suspense fallback={<div className="login"><div className="empty">Loading…</div></div>}>

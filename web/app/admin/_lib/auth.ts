@@ -2,10 +2,15 @@ import 'server-only';
 // Server-side admin check for every Command Center layout and page.
 import { cache } from 'react';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 import { adminServerClient, currentAdmin } from '@/lib/supabase/admin-server';
 
 /** admin_me for this request (deduplicated across the layout and page). */
-export const getAdmin = cache(currentAdmin);
+export const getAdmin = cache(async () => {
+  // per-request: the Supabase session check reads the clock (token expiry), which must not be prerendered
+  await connection();
+  return currentAdmin();
+});
 
 /**
  * The signed-in admin, or a redirect to the sign-in page. A session that is not an admin's goes to

@@ -15,7 +15,7 @@ export default defineConfig({
   use: { baseURL: BASE_URL, trace: 'retain-on-failure' },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
-    { name: 'phone', use: { ...devices['Desktop Chrome'], viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true }, testMatch: /smoke\.spec/ },
+    { name: 'phone', use: { ...devices['Desktop Chrome'], viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true }, testMatch: /(smoke|flows|menus)\.spec/ },
   ],
   webServer: process.env.BASE_URL ? undefined : { command: 'npm run dev -- --port 3210', url: BASE_URL, reuseExistingServer: true, timeout: 120_000 },
 });

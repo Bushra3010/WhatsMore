@@ -39,7 +39,10 @@ afterSend.push((ch, m) => {
   }
   const sid = crypto.randomUUID();
   const oldId = m.id;
-  m.id = 'sm_' + sid; m.sbId = sid; m.status = 'sent';
+  // payment messages keep their own status (pending / paid / declined) instead of delivery ticks
+  const ticks = kind !== 'payment';
+  m.id = 'sm_' + sid; m.sbId = sid; m.uploading = true;
+  if (ticks) m.status = 'sent';
   if (ui.replyTo === oldId) ui.replyTo = m.id;
   const reply_to = m.replyTo?.startsWith('sm_') ? rawId(m.replyTo) : null;
   commit();
@@ -63,10 +66,11 @@ afterSend.push((ch, m) => {
     }
     const { data, error } = await sb.from('messages').insert({ id: sid, conversation_id: ch.sbId, reply_to, ...row }).select('created_at').single();
     if (error) throw error;
-    m.t = Date.parse(data.created_at); m.status = 'delivered';
+    m.t = Date.parse(data.created_at); delete m.uploading;
+    if (ticks) m.status = 'delivered';
     applyReads(ch); refreshMsg(ch);
   })().catch((err) => {
-    m.status = 'failed'; refreshMsg(ch);
+    delete m.uploading; m.status = 'failed'; refreshMsg(ch);
     // refused by the database: most likely a suspension made after this page loaded
     if (/row-level security/i.test(err?.message || '')) refusalHooks.forEach((f) => f());
     else toast('Not sent: ' + (err?.message || err));

@@ -1,1 +1,8 @@
 .app-loading { height: 100vh; background: var(--panel, #fff); }
+
+/* Announcement banner from the Command Center: the app moves down below it instead of being covered. */
+:root { --ann-h: 0px; }
+#app.app { margin-top: var(--ann-h); height: calc(100dvh - var(--ann-h)); }
+@media (max-width: 760px) {
+  #main.main, #drawer.drawer { top: var(--ann-h); }
+}

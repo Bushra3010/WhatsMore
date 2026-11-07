@@ -55,7 +55,7 @@ export function msgMenu(mid: string, anchor: Anchor) {
 
 export function deleteMsgModal(ch: Chat, m: Message) {
   const acts: { label: string; danger?: boolean; onClick?: () => void }[] = [{ label: 'Cancel' }];
-  const canEveryone = m.from === 'me' && m.type !== 'deleted' && (!ch.cloud || (m.status !== 'sent' && !m.localOnly));
+  const canEveryone = m.from === 'me' && m.type !== 'deleted' && (!ch.cloud || (m.status !== 'sent' && !m.uploading && !m.localOnly));
   if (canEveryone) acts.push({
     label: 'Delete for everyone', danger: true, onClick: () => {
       if (fire('deleteForEveryone', ch, m)) return;

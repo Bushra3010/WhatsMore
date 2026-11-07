@@ -220,7 +220,7 @@ function markRead(ch) {
   (S.cloudRead ||= {})[ch.sbId] = lastTime(ch);
   if (!S.settings.privacy.readReceipts) return;
   clearTimeout(CL.readT[ch.sbId]);
-  CL.readT[ch.sbId] = setTimeout(() => sb.rpc('mark_read', { c: ch.sbId }), 400);
+  CL.readT[ch.sbId] = setTimeout(() => sb.rpc('mark_read', { c: ch.sbId }).then(() => {}), 400); // queries only run once then()-ed
 }
 document.addEventListener('visibilitychange', () => { if (ui.active?.startsWith('sb_')) markRead(chatById(ui.active)); });
 

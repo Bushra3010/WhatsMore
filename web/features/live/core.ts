@@ -104,7 +104,7 @@ export function applyReads(ch: Chat | undefined) {
   if (!ch?.cloud) return;
   const others = ch.type === 'direct' ? [ch.contactId!] : ch.members || [];
   const upTo = S.settings.privacy.readReceipts && others.length ? Math.min(...others.map((id) => ch.readBy?.[id] || 0)) : 0;
-  ch.messages.forEach((m) => { if (m.from === 'me' && m.sbId && m.status !== 'failed' && m.status !== 'sent') m.status = m.t <= upTo ? 'read' : 'delivered'; });
+  ch.messages.forEach((m) => { if (m.from === 'me' && m.sbId && m.type !== 'payment' && m.status !== 'failed' && m.status !== 'sent') m.status = m.t <= upTo ? 'read' : 'delivered'; });
 }
 
 // ---------- polls, events, payment requests: everyone's votes / RSVPs / payments (demo wallets only)
@@ -181,7 +181,7 @@ export function cloudSync(): Promise<void> {
         if (p) ['starred', 'pinned', 'played'].forEach((k) => { if (p[k]) m[k] = p[k]; });
         return m;
       });
-      (prev?.messages || []).forEach((m) => { if ((m.localOnly || (m.from === 'me' && m.status === 'sent')) && !list.some((x) => x.id === m.id)) list.push(m); });
+      (prev?.messages || []).forEach((m) => { if ((m.localOnly || m.uploading || (m.from === 'me' && m.status === 'sent')) && !list.some((x) => x.id === m.id)) list.push(m); });
       list.sort((a, b) => a.t - b.t);
       const base: any = { id: chid(cv.id), sbId: cv.id, cloud: true, unread: list.filter((m) => m.from !== 'me' && m.t > (read[cv.id] || 0)).length, readBy: {}, messages: [{ id: 'sys_' + cv.id, type: 'system', from: 'system', t: Date.parse(cv.created_at), text: SYS_E2E }, ...list] };
       others.forEach((m) => { if (m.last_read_at) base.readBy[cuid(m.user_id)] = Date.parse(m.last_read_at); });
@@ -268,7 +268,8 @@ export function markRead(ch: Chat | undefined) {
   save();
   if (!S.settings.privacy.readReceipts) return;
   clearTimeout(CL.readT[ch.sbId!]);
-  CL.readT[ch.sbId!] = setTimeout(() => { sb.rpc('mark_read', { c: ch.sbId }); }, 400);
+  // supabase-js only sends a query once it is awaited or then()-ed
+  CL.readT[ch.sbId!] = setTimeout(() => { sb.rpc('mark_read', { c: ch.sbId }).then(({ error }) => { if (error) console.warn('mark_read failed', error.message); }); }, 400);
 }
 
 // ---------- typing and online: Realtime broadcast + presence, one channel per conversation
