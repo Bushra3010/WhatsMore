@@ -18,3 +18,6 @@ export function switchProfile(k: string) {
   commit();
   toast(`${PROFILES[k][1]} Switched to ${PROFILES[k][0]} profile — its own notifications, privacy and status`);
 }
+/** Chats with unread messages that the Chats list shows right now (not archived, not locked, in the
+ *  current profile) — used for the Chats badge and the Home card so they match the list. */
+export const visibleUnreadChats = () => S.chats.filter((c) => (c.unread || 0) > 0 && !c.archived && !c.locked && profileMatch(c));

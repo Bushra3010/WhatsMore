@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { S, ui } from '@/lib/state';
 import { goTab } from '@/lib/nav';
 import { Icon } from '@/components/Icon';
+import { visibleUnreadChats } from '@/lib/profiles';
 import { Avatar } from '@/components/ui/Avatar';
 
 // Mobile bottom bar follows the blueprint: Home | Chats | AI | Services | Profile. The rest live on Home.
@@ -14,7 +15,7 @@ export function openTab(tab: string) { goTab(tab); onTabOpen.forEach((f) => f(ta
 export function Rail() {
   const [narrow, setNarrow] = useState(false);
   useEffect(() => { const f = () => setNarrow(innerWidth <= 760); f(); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f); }, []);
-  const unread = S.chats.filter((c) => (c.unread || 0) > 0 && !c.archived && !c.locked).length;
+  const unread = visibleUnreadChats().length;
   const newStatus = S.statuses.some((s) => !s.viewed);
   const btn = (id: string, ic: string, label: string, desk?: boolean) => (
     <button key={id} className={`rail-btn ${ui.tab === id ? 'active' : ''} ${desk ? 'desk-only' : ''}`} data-act="tab" data-tab={id} title={label} aria-label={label} onClick={() => openTab(id)}>

@@ -4,6 +4,7 @@
 // js/superapp.js layer (greeting in your language, search, notification bell).
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Fragment, type ReactNode } from 'react';
+import { visibleUnreadChats } from '@/lib/profiles';
 import { S, ui, refresh } from '@/lib/state';
 import { showMenu } from '@/lib/overlay';
 import { act } from '@/lib/registry';
@@ -45,7 +46,7 @@ function Card({ act: a, data, ic, color, title, sub, onClick }: { act: string; d
 }
 
 export function HomeTab() {
-  const unreadChats = S.chats.filter((c) => (c.unread || 0) > 0 && !c.archived && !c.locked);
+  const unreadChats = visibleUnreadChats();
   const unread = unreadChats.reduce((s, c) => s + (c.unread || 0), 0);
   const sigWait = S.chats.flatMap((c) => c.messages.filter((m) => m.type === 'signreq' && m.from !== 'me' && m.status === 'pending').map((m) => ({ c, m })))[0];
   const scam = S.chats.find((c) => c.messages.some((m) => m.type === 'text' && m.from !== 'me' && !m.safe && !m.reported && scamCheck(m.text).length) && !contact(c.contactId)?.blocked);

@@ -70,7 +70,7 @@ function switchProfile(k) {
 // ---------- HOME (personal digital dashboard)
 function greeting() { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; }
 function tabHome() {
-  const unreadChats = S.chats.filter((c) => c.unread > 0 && !c.archived && !c.locked);
+  const unreadChats = S.chats.filter((c) => c.unread > 0 && !c.archived && !c.locked && (typeof profileMatch !== 'function' || profileMatch(c)));
   const unread = unreadChats.reduce((s, c) => s + c.unread, 0);
   const sigWait = S.chats.flatMap((c) => c.messages.filter((m) => m.type === 'signreq' && m.from !== 'me' && m.status === 'pending').map((m) => ({ c, m })))[0];
   const scam = S.chats.find((c) => c.messages.some((m) => m.type === 'text' && m.from !== 'me' && !m.safe && !m.reported && scamCheck(m.text).length) && !contact(c.contactId)?.blocked);

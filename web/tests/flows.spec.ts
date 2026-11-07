@@ -157,4 +157,24 @@ test.describe('demo flows', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     canary.check();
   });
+
+  test('reading every chat in the list clears the Chats badge', async ({ page }) => {
+    const canary = errorCanary(page);
+    await openApp(page);
+    await page.locator('[data-act="tab"][data-tab="chats"]:visible').first().click();
+    const badge = page.locator('[data-act="tab"][data-tab="chats"]:visible .rail-badge');
+    await expect(badge).toBeVisible();
+    // chats hidden in other profiles must not count
+    const ids = await page.locator('#sidebar [data-act="open"][data-chat]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.chat!));
+    for (const id of ids) {
+      await page.locator('[data-act="tab"][data-tab="chats"]:visible').first().click();
+      await page.locator(`#sidebar [data-act="open"][data-chat="${id}"]`).first().click();
+      const back = page.locator('[data-act="closechat"]:visible');
+      if (await back.count()) await back.first().click();
+    }
+    await page.locator('[data-act="tab"][data-tab="chats"]:visible').first().click();
+    await expect(page.locator('#sidebar .chat-item .badge:not(.grey)')).toHaveCount(0);
+    await expect(badge).toHaveCount(0);
+    canary.check();
+  });
 });

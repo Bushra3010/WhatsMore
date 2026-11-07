@@ -4,7 +4,7 @@
 const TABS = [['home', 'home', 'Home'], ['chats', 'chat', 'Chats'], ['status', 'status', 'Status', 1], ['calls', 'call', 'Calls', 1], ['communities', 'groups', 'Communities', 1], ['files', 'cloud', 'Files', 1], ['ai', 'sparkle', 'AI'], ['services', 'apps', 'Services']];
 
 function renderRail() {
-  const unread = S.chats.filter((c) => c.unread > 0 && !c.archived && !c.locked).length;
+  const unread = S.chats.filter((c) => c.unread > 0 && !c.archived && !c.locked && (typeof profileMatch !== 'function' || profileMatch(c))).length;
   const newStatus = S.statuses.some((s) => !s.viewed);
   const btn = (id, ic, label, desk) => `<button class="rail-btn ${ui.tab === id ? 'active' : ''} ${desk ? 'desk-only' : ''}" data-act="tab" data-tab="${id}" title="${label}" aria-label="${label}">
     <span class="rail-ic">${icon(ic)}</span>${id === 'chats' && unread ? `<span class="rail-badge">${unread}</span>` : ''}${id === 'status' && newStatus ? '<span class="rail-dot"></span>' : ''}<span class="rail-label">${label}</span></button>`;
