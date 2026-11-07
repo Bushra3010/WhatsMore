@@ -5,7 +5,7 @@
 // Demo only: nothing is sent anywhere for the OTP flow, the OTP is shown on screen, and only a masked number is kept.
 import { useEffect, useState, type ReactNode } from 'react';
 import { create } from 'zustand';
-import { S, commit } from '@/lib/state';
+import { S, commit, useRender } from '@/lib/state';
 import { act } from '@/lib/registry';
 import { allUsernames, hash, namesSummary, contact } from '@/lib/util';
 import { toast } from '@/lib/overlay';
@@ -159,7 +159,6 @@ async function ob(go: string, data: Record<string, string> = {}) {
   }
 
   // demo flow (onboarding.js)
-  if (go === 'skip') { S.settings.onboarded = true; commit(); closeOnboarding(); return; }
   if (go === 'login') { OB.via = data.via || OB.via; const l = $<HTMLSelectElement>('#ob-lang'); if (l) S.settings.myLang = l.value; return setStep('login'); }
   if (go === 'welcome') return setStep('welcome');
   if (go === 'otp') {
@@ -229,27 +228,15 @@ const LangField = () => (
 );
 
 function Welcome() {
-  if (liveOn()) {
-    return (
-      <div className="ob-card">
-        <Logo size={64} /><h2>Welcome to WHATSMORE</h2>
-        <p className="muted">Chat. AI. Pay. Business. Services. Community.<br />One secure app for your digital life.</p>
-        <LangField />
-        <ObBtn go="acct-signup"><Icon name="personadd" size={18} /> Create an account</ObBtn>
-        <ObBtn go="acct-signin" cls="btn block"><Icon name="person" size={18} /> Sign in</ObBtn>
-        <p className="muted small">By continuing you agree to the Terms and Privacy Policy.</p>
-        <ObBtn go="skip" cls="link-btn">Try the demo without an account</ObBtn>
-      </div>
-    );
-  }
+  // A WHATSMORE account is required: there is no demo mode
   return (
     <div className="ob-card">
       <Logo size={64} /><h2>Welcome to WHATSMORE</h2>
       <p className="muted">Chat. AI. Pay. Business. Services. Community.<br />One secure app for your digital life.</p>
       <LangField />
-      <ObBtn go="login" data={{ via: 'phone' }}><Icon name="phone" size={18} /> Continue with phone number</ObBtn>
-      <ObBtn go="login" data={{ via: 'email' }} cls="btn block"><Icon name="doc" size={18} /> Continue with email</ObBtn>
-      <p className="muted small">By continuing you agree to the Terms and Privacy Policy. <ObBtn go="skip" cls="link-btn">Skip demo setup</ObBtn></p>
+      <ObBtn go="acct-signup"><Icon name="personadd" size={18} /> Create an account</ObBtn>
+      <ObBtn go="acct-signin" cls="btn block"><Icon name="person" size={18} /> Sign in</ObBtn>
+      <p className="muted small">By continuing you agree to the Terms and Privacy Policy.</p>
     </div>
   );
 }
@@ -495,10 +482,17 @@ const SCREENS: Record<string, () => ReactNode> = {
 /** Always-mounted overlay: shows the onboarding when open, and opens it on first run. */
 export function Onboarding() {
   const { open, step } = useOb();
+  useRender();
+  useEffect(() => { ensureSettings(); }, []);
+  // Signed out (first run, after signing out, or a session that ended): show the account screens.
+  // Signed in: close them, except the "You're all set" step right after creating an account.
+  const ready = 'liveReady' in act && !!act.liveReady();
+  const signedIn = 'liveIsSignedIn' in act && !!act.liveIsSignedIn();
   useEffect(() => {
-    ensureSettings();
-    if (!S.settings.onboarded) startOnboarding();
-  }, []);
+    if (!ready) return;
+    if (!signedIn && !useOb.getState().open) startOnboarding();
+    if (signedIn && useOb.getState().open && ['splash', 'welcome'].includes(useOb.getState().step)) closeOnboarding();
+  }, [ready, signedIn]);
   useEffect(() => {
     if (!open || step !== 'splash') return;
     const t = setTimeout(() => { if (useOb.getState().step === 'splash') setStep('welcome'); }, 1800);

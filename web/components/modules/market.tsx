@@ -4,10 +4,11 @@
 // professional services (js/cloudplus.js) and the seller dashboard (js/superapp.js §18).
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect } from 'react';
+import { BAKERY } from '@/lib/seed';
 import { S, ui, commit, refresh } from '@/lib/state';
 import { modal, toast } from '@/lib/overlay';
 import { startDM } from '@/lib/actions';
-import { uid, money, contact, directChatFor, chatById, DAY } from '@/lib/util';
+import { uid, money, contact, directChatFor, DAY } from '@/lib/util';
 import type { Chat, Message } from '@/lib/types';
 import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/ui/Avatar';
@@ -39,6 +40,8 @@ const MARKET_CATS: [string, string][] = [['all', 'All'], ['shopping', '🛍️ S
 
 function ensureSeller(id: string) {
   const sdef = SELLERS[id];
+  // Sunrise Bakery (Local shops) is defined with the seed; its chat starts when you first open the shop
+  if (id === BAKERY.id && !contact(id)) S.contacts.push({ ...BAKERY, isContact: false } as any);
   if (!sdef) return contact(id);
   if (!S.catalog[id]) S.catalog[id] = sdef.products.map((p) => ({ ...p }));
   let c = contact(id);
@@ -104,7 +107,7 @@ function mkBuy(pid: string) {
     st.orders.push({ id: 'OD' + Math.floor(1e5 + Math.random() * 9e5), name: x.p.name, emoji: x.p.emoji, bg: x.p.bg, price: x.p.price, sname: x.sname, t: Date.now() });
     commit();
     toast('🧾 Order placed · invoice sent to your chat with ' + x.sname);
-    const ch = x.seller === 'c_bakery' ? chatById('ch_bakery') : sellerChat(x.seller);
+    const ch = sellerChat(x.seller);
     if (ch) { ch.messages.push({ id: uid(), from: ch.contactId!, type: 'invoice', orderId: 'OD' + Math.floor(Math.random() * 1e5), items: [{ name: x.p.name, qty: 1, price: x.p.price }], total: x.p.price, t: Date.now(), status: 'read', reactions: {}, bot: true }); ch.unread = (ch.unread || 0) + 1; commit(); }
   } });
 }

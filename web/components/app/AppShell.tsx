@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { S, ui, load, refresh, useRender, KEY, replaceState } from '@/lib/state';
 import { tabs, pages, views, mains, drawers, overlays } from '@/lib/registry';
 import { chatById } from '@/lib/util';
-import { OverlayHost, closeMenu, toast } from '@/lib/overlay';
+import { OverlayHost, closeMenu } from '@/lib/overlay';
 import { settingHooks } from '@/components/ui/Bits';
 import { Rail } from './Rail';
 import { EmptyMain } from './EmptyMain';
@@ -17,7 +17,7 @@ import '@/components/modules';
 import '@/components/media';
 import '@/components/docs';
 import '@/features/live';
-import { isNativeApp } from '@/features/native';
+import '@/features/native';
 
 export function applyTheme() {
   const t = S.settings.theme;
@@ -48,13 +48,6 @@ export default function AppShell() {
       refresh();
     };
     window.addEventListener('storage', onStorage);
-    try {
-      if (!sessionStorage.getItem('wm-welcome')) {
-        sessionStorage.setItem('wm-welcome', '1');
-        const where = isNativeApp() ? 'on this phone' : 'in your browser';
-        setTimeout(() => toast(`👋 Welcome to the WHATSMORE demo — everything runs locally ${where}.`, null, { ms: 5000 }), 600);
-      }
-    } catch { /* storage unavailable */ }
     return () => { mq.removeEventListener?.('change', applyTheme); window.removeEventListener('resize', onResize); window.removeEventListener('storage', onStorage); };
   }, []);
   if (!ready) return <div className="app-loading" aria-busy="true" />;

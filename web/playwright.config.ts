@@ -6,6 +6,9 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3210';
 
 export default defineConfig({
   testDir: './tests',
+  // The app has no demo data: the suite runs against two real throwaway accounts (see tests/accounts.ts).
+  globalSetup: './tests/global-setup.ts',
+  globalTeardown: './tests/global-teardown.ts',
   timeout: 60_000,
   expect: { timeout: 8_000 },
   fullyParallel: true,

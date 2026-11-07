@@ -71,7 +71,7 @@ for (const theme of ['light', 'dark'] as const) {
       await openApp(page, { theme });
       await openTab(page, 'chats');
       const ids = await page.locator('#sidebar [data-act="open"][data-chat]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.chat!));
-      expect(ids.length).toBeGreaterThan(5);
+      expect(ids.length).toBeGreaterThan(0); // the live chat between the two test accounts
       for (const id of ids) {
         await openTab(page, 'chats');
         await page.locator(`#sidebar [data-act="open"][data-chat="${id}"]`).first().click();

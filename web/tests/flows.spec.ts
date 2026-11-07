@@ -1,9 +1,10 @@
-// Typed user flows in demo mode (no account): messaging, message actions, polls, payments, calls,
-// status, AI, groups, settings. Each test starts from fresh demo data.
+// Typed user flows, signed in as test account A, in the live chat with test account B (no demo data).
+// Tests run in parallel in the same chat, so each one uses its own unique text.
 import { test, expect, type Page } from '@playwright/test';
-import { errorCanary, openApp } from './helpers';
+import { errorCanary, openApp, liveChatId } from './helpers';
+import { loadFixture } from './accounts';
 
-async function openChat(page: Page, id: string) {
+async function openChat(page: Page, id = liveChatId()) {
   await page.locator('[data-act="tab"][data-tab="chats"]:visible').first().click();
   await page.locator(`#sidebar [data-act="open"][data-chat="${id}"]`).first().click();
   await expect(page.locator('#msgs')).toBeVisible();
@@ -12,102 +13,120 @@ async function send(page: Page, text: string) {
   await page.locator('#input').fill(text);
   await page.locator('#input').press('Enter');
 }
-const lastOut = (page: Page) => page.locator('#msgs .msg-row.out').last();
+const uniq = (s: string) => `${s} ${Math.random().toString(36).slice(2, 7)}`;
+const rowWith = (page: Page, text: string) => page.locator('#msgs .msg-row', { hasText: text }).last();
 const menuItem = (page: Page, name: string | RegExp) => page.locator('#menu').getByRole('menuitem', { name });
 const dialog = (page: Page) => page.locator('.modal[role="dialog"]').last();
 
-test.describe('demo flows', () => {
-  test('send a message, get ticks and a reply', async ({ page }) => {
+test.describe('flows (live chat between test accounts)', () => {
+  test('the live chat shows the other account and its messages', async ({ page }) => {
     const canary = errorCanary(page);
     await openApp(page);
-    await openChat(page, 'ch_ananya');
-    const before = await page.locator('#msgs .msg-row.in').count();
-    await send(page, 'how are you');
-    await expect(lastOut(page)).toContainText('how are you');
-    await expect.poll(() => page.locator('#msgs .msg-row.in').count(), { timeout: 15_000 }).toBeGreaterThan(before);
+    await openChat(page);
+    const fx = loadFixture();
+    await expect(page.locator('.chat-head')).toContainText(fx.B.name);
+    for (const t of fx.texts) await expect(rowWith(page, t)).toBeVisible();
+    await expect(page.locator('.cloudbar')).toBeVisible();
+    canary.check();
+  });
+
+  test('send a message; it is delivered to the server', async ({ page }) => {
+    const canary = errorCanary(page);
+    await openApp(page);
+    await openChat(page);
+    const text = uniq('Delivery check');
+    await send(page, text);
+    await expect(rowWith(page, text).locator('.tick')).toBeVisible({ timeout: 15_000 });
+    await expect(rowWith(page, text).locator('.tick.failed')).toHaveCount(0);
     canary.check();
   });
 
   test('react, reply, edit and delete a message', async ({ page }) => {
     const canary = errorCanary(page);
     await openApp(page);
-    await openChat(page, 'ch_mom');
-    await send(page, 'Original text');
-    const row = lastOut(page);
+    await openChat(page);
+    const text = uniq('Original text');
+    await send(page, text);
+    const row = rowWith(page, text);
+    await expect(row.locator('.tick')).toBeVisible({ timeout: 15_000 });
+    await page.waitForTimeout(800);
     await row.click({ button: 'right' });
     await page.locator('#menu [data-react="❤️"]').click();
     await expect(row).toContainText('❤️');
 
     await row.click({ button: 'right' });
     await menuItem(page, 'Reply').click();
-    await expect(page.locator('#reply-box')).toContainText('Original text');
-    await send(page, 'A reply');
-    await expect(lastOut(page).locator('.quote')).toContainText('Original text');
+    await expect(page.locator('#reply-box')).toContainText(text);
+    const reply = uniq('A reply');
+    await send(page, reply);
+    await expect(rowWith(page, reply).locator('.quote')).toContainText(text);
 
-    await lastOut(page).click({ button: 'right' });
+    await expect(rowWith(page, reply).locator('.tick')).toBeVisible({ timeout: 15_000 });
+    await page.waitForTimeout(800);
+    await rowWith(page, reply).click({ button: 'right' });
     await menuItem(page, 'Edit').click();
-    await page.locator('#input').fill('Edited reply');
+    const edited = uniq('Edited reply');
+    await page.locator('#input').fill(edited);
     await page.locator('#input').press('Enter');
-    await expect(lastOut(page)).toContainText('Edited reply');
-    await expect(lastOut(page)).toContainText(/edited/i);
+    await expect(rowWith(page, edited)).toContainText(/edited/i);
 
-    await lastOut(page).click({ button: 'right' });
+    await rowWith(page, edited).click({ button: 'right' });
     await menuItem(page, 'Delete').click();
     await dialog(page).getByRole('button', { name: 'Delete for everyone' }).click();
-    await expect(lastOut(page)).toContainText(/deleted/i);
+    await expect(page.locator('#msgs')).not.toContainText(edited, { timeout: 15_000 });
     canary.check();
   });
 
   test('create a poll and vote', async ({ page }) => {
     const canary = errorCanary(page);
     await openApp(page);
-    await openChat(page, 'ch_trip');
+    await openChat(page);
+    const q = uniq('Where should we go?');
     await page.locator('[data-act="attach"]').click();
     await menuItem(page, 'Poll').click();
-    await page.locator('#pl-q').fill('Where should we go?');
+    await page.locator('#pl-q').fill(q);
     const opts = page.locator('.pl-opt');
     await opts.nth(0).fill('Goa');
     await opts.nth(1).fill('Ooty');
     await dialog(page).getByRole('button', { name: /send|create/i }).click();
-    await expect(lastOut(page)).toContainText('Where should we go?');
-    await lastOut(page).locator('[data-act="vote"]').first().click();
+    await expect(rowWith(page, q)).toBeVisible();
+    await page.waitForTimeout(1500); // the poll reaches the server before voting
+    await rowWith(page, q).locator('[data-act="vote"]').first().click();
+    await expect(rowWith(page, q)).toContainText(/1 vote/i);
     canary.check();
   });
 
-  test('send a demo payment', async ({ page }) => {
+  test('send a payment (demo money)', async ({ page }) => {
     const canary = errorCanary(page);
     await openApp(page);
-    await openChat(page, 'ch_priya');
+    await openChat(page);
     await page.locator('[data-act="attach"]').click();
     await menuItem(page, 'Payment').click();
-    await page.locator('#pm-amt').fill('150');
+    await page.locator('#pm-amt').fill('151');
     await dialog(page).getByRole('button', { name: 'Continue' }).click();
-    await expect(lastOut(page)).toContainText('150');
+    await expect(rowWith(page, '151')).toBeVisible();
     canary.check();
   });
 
   test('search inside a chat', async ({ page }) => {
     const canary = errorCanary(page);
     await openApp(page);
-    await openChat(page, 'ch_trip');
+    await openChat(page);
     const search = page.locator('[data-act="chatsearch"]:visible');
     if (await search.count()) await search.first().click();
     else { await page.locator('.chat-head [data-act="headmenu"]').click(); await page.locator('#menu').getByRole('menuitem', { name: 'Search' }).click(); } // phones: in the ⋮ menu
-    await page.locator('#cs-input').fill('car');
+    await page.locator('#cs-input').fill('car park');
     await expect(page.locator('#msgs mark').first()).toBeVisible();
     canary.check();
   });
 
-  test('start and end a demo video call', async ({ page, context }) => {
-    await context.grantPermissions([]);
+  test('the other account’s story is visible', async ({ page }) => {
     const canary = errorCanary(page);
     await openApp(page);
-    await openChat(page, 'ch_siva');
-    await page.locator('.chat-head [aria-label*="ideo"]').first().click();
-    const end = page.getByRole('button', { name: /end call/i }).first();
-    await expect(end).toBeVisible();
-    await end.click();
-    await expect(end).toHaveCount(0);
+    const tab = page.locator('[data-act="tab"][data-tab="status"]:visible');
+    test.skip(!(await tab.count()), 'Status is a desktop rail tab');
+    await tab.first().click();
+    await expect(page.locator('#sidebar')).toContainText(loadFixture().B.name, { timeout: 20_000 });
     canary.check();
   });
 
@@ -118,9 +137,9 @@ test.describe('demo flows', () => {
     test.skip(!(await tab.count()), 'Status is a desktop rail tab');
     await tab.first().click();
     await page.locator('[data-act="addstatus"]').first().click();
-    await dialog(page).locator('textarea').first().fill('Hello from the test suite');
+    await dialog(page).locator('textarea').first().fill(uniq('Hello from the test suite'));
     await dialog(page).getByRole('button', { name: /post|share/i }).last().click();
-    await expect(page.locator('#sidebar')).toContainText(/My status/i);
+    await expect(page.getByText(/Status shared with/)).toBeVisible({ timeout: 15_000 });
     canary.check();
   });
 
@@ -128,23 +147,24 @@ test.describe('demo flows', () => {
     const canary = errorCanary(page);
     await openApp(page);
     await page.locator('[data-act="tab"][data-tab="ai"]:visible').first().click();
-    const input = page.locator('#ai-input');
-    await input.fill('Translate good morning to Telugu');
+    await page.locator('#ai-input').fill('Translate good morning to Telugu');
     await page.locator('[data-act="aisend"]').click();
     await expect(page.locator('#ai-msgs')).toContainText(/శుభోదయం|Telugu/i, { timeout: 10_000 });
     canary.check();
   });
 
-  test('create a demo group', async ({ page }) => {
+  test('create a live group with the other account', async ({ page }) => {
     const canary = errorCanary(page);
     await openApp(page);
+    const name = uniq('Test group');
     await page.locator('[data-act="tab"][data-tab="chats"]:visible').first().click();
-    await page.locator('#sidebar [aria-label="New chat"], #sidebar [data-act="newchat"]').first().click();
+    await page.locator('#sidebar [aria-label="New chat"]').first().click();
     await page.getByText(/new group/i).first().click();
-    await page.locator('#ng-name').fill('Test group');
-    await page.locator('#sidebar .check-row, #sidebar [data-pick]').first().click();
+    await page.locator('#ng-name').fill(name);
+    await page.locator('#sidebar .check-row', { hasText: loadFixture().B.name }).first().click();
     await page.getByRole('button', { name: /create group/i }).click();
-    await expect(page.locator('.chat-head')).toContainText('Test group');
+    await expect(page.locator('.chat-head')).toContainText(name, { timeout: 15_000 });
+    await expect(page.locator('.cloudbar')).toBeVisible();
     canary.check();
   });
 
@@ -158,23 +178,38 @@ test.describe('demo flows', () => {
     canary.check();
   });
 
-  test('reading every chat in the list clears the Chats badge', async ({ page }) => {
+  test('reading the chat clears the Chats badge', async ({ page }) => {
     const canary = errorCanary(page);
     await openApp(page);
-    await page.locator('[data-act="tab"][data-tab="chats"]:visible').first().click();
     const badge = page.locator('[data-act="tab"][data-tab="chats"]:visible .rail-badge');
-    await expect(badge).toBeVisible();
-    // chats hidden in other profiles must not count
-    const ids = await page.locator('#sidebar [data-act="open"][data-chat]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.chat!));
-    for (const id of ids) {
-      await page.locator('[data-act="tab"][data-tab="chats"]:visible').first().click();
-      await page.locator(`#sidebar [data-act="open"][data-chat="${id}"]`).first().click();
-      const back = page.locator('[data-act="closechat"]:visible');
-      if (await back.count()) await back.first().click();
-    }
+    await expect(badge).toBeVisible(); // the other account's messages are unread on a new device
+    await openChat(page);
+    const back = page.locator('[data-act="closechat"]:visible');
+    if (await back.count()) await back.first().click();
     await page.locator('[data-act="tab"][data-tab="chats"]:visible').first().click();
-    await expect(page.locator('#sidebar .chat-item .badge:not(.grey)')).toHaveCount(0);
+    await expect(page.locator(`#sidebar [data-chat="${liveChatId()}"] .badge:not(.grey)`)).toHaveCount(0);
     await expect(badge).toHaveCount(0);
+    canary.check();
+  });
+
+  test('a new install has no demo data and asks to sign in', async ({ page }) => {
+    const canary = errorCanary(page);
+    await page.goto('/');
+    await expect(page.getByRole('button', { name: 'Create an account' })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
+    await expect(page.getByText(/Try the demo/i)).toHaveCount(0);
+    await expect(page.locator('#sidebar [data-act="open"][data-chat]')).toHaveCount(0);
+    canary.check();
+  });
+
+  test('signing out removes the account from this device', async ({ page }) => {
+    const canary = errorCanary(page);
+    await openApp(page, { as: 'B' });
+    await page.locator('[data-act="tab"][data-tab="settings"]:visible').first().click();
+    await page.locator('[data-act="cloudsignout"]').click();
+    await page.locator('.modal').getByRole('button', { name: 'Sign out' }).click();
+    await expect(page.getByRole('button', { name: 'Create an account' })).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('#sidebar [data-act="open"][data-chat]')).toHaveCount(0);
     canary.check();
   });
 });

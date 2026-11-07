@@ -6,7 +6,9 @@ import { create } from 'zustand';
 import { makeSeed } from './seed';
 import type { AppState, UIState } from './types';
 
-export const KEY = 'whatsmore-next-v1';
+// v2: no built-in demo data. Data saved by older versions (demo chats and people) is discarded.
+export const KEY = 'whatsmore-next-v2';
+const OLD_KEYS = ['whatsmore-next-v1'];
 
 export function initialUI(): UIState {
   return {
@@ -43,16 +45,17 @@ export function save() {
 
 /** Load saved state (client only). Returns true when saved data was found. */
 export function load(): boolean {
+  try { OLD_KEYS.forEach((k) => localStorage.removeItem(k)); } catch { /* storage unavailable */ }
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) { const s = JSON.parse(raw); if (s && s.version === 1) { S = s; refresh(); return true; } }
+    if (raw) { const s = JSON.parse(raw); if (s && s.version === 2) { S = s; refresh(); return true; } }
   } catch { /* corrupted: start fresh */ }
   S = makeSeed();
   refresh();
   return false;
 }
 
-/** Replace the whole state (reset demo, tests). */
+/** Replace the whole state (sign-out, clearing this device, tests). */
 export function replaceState(next: AppState) { S = next; commit(); }
 
 export function resetUI() { Object.assign(ui, initialUI()); refresh(); }

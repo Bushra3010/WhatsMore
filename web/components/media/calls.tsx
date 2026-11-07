@@ -69,13 +69,11 @@ export async function startCall(ch: Chat | null, video: boolean, opts: { room?: 
     renderCall();
     call.ansT = setTimeout(() => {
       if (M.call !== call) return;
-      if (call.room) call.joined = ['c_siva'];
       call.state = 'connected';
       call.start = Date.now();
       renderCall();
       call.timer = setInterval(() => { if (M.call?.start) bump(); }, 1000);
-      if (call.room) setTimeout(() => { if (M.call === call) { call.joined.push('c_ananya'); renderCall(); toast('Ananya joined the call'); } }, 4000);
-      if (call.room) knockLater(call); else scheduleCallWaiting(call);
+      if (!call.room) scheduleCallWaiting(call);
     }, call.room ? 3500 : 2400);
   }, 1200);
 }
@@ -251,17 +249,6 @@ function startCC(call: Call) {
   }
 }
 function stopCC(call: Call) { clearInterval(call.ccT); try { call.sr?.stop(); } catch { /* ignore */ } call.sr = null; }
-
-function knockLater(call: Call) {
-  // Simulate people arriving through the room link; with the waiting room on, the host admits them
-  ([['u_rahul', 7000], ['u_fatima', 13000]] as [string, number][]).forEach(([id, d]) => setTimeout(() => {
-    if (M.call !== call || call.state !== 'connected' || call.locked) return;
-    ensureContact(id);
-    if (call.waitingRoom) { (call.waiting ||= []).push(id); toast(`${senderName(id)} is waiting to join`); }
-    else { call.joined.push(id); toast(`${senderName(id)} joined`); }
-    renderCall();
-  }, d));
-}
 
 // ---------- call waiting
 function scheduleCallWaiting(call: Call) {

@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { S, ui, commit, save, refresh, useRender } from '@/lib/state';
-import { MIN, HOUR, uid, money, chatTitle, preview, lastTime, listTime, chatById, contact, firstName } from '@/lib/util';
+import { uid, chatTitle, listTime, chatById, contact, firstName } from '@/lib/util';
 import { openChat } from '@/lib/actions';
 import type { Chat } from '@/lib/types';
 import { Icon } from '@/components/Icon';
@@ -12,19 +12,8 @@ import { svc, gotab } from './shared';
 
 export const NCATS: [string, string, string][] = [['messages', 'Messages', 'chat'], ['calls', 'Calls', 'call'], ['payments', 'Payments', 'rupee'], ['business', 'Business', 'store'], ['marketplace', 'Marketplace', 'cart'], ['community', 'Community', 'groups'], ['ai', 'AI', 'sparkle'], ['security', 'Security', 'shield'], ['services', 'Services', 'bank']];
 
-export function seedNotifs() {
-  const t = Date.now(), log: any[] = [];
-  S.chats.filter((c) => (c.unread || 0) > 0 && !c.locked).slice(0, 3).forEach((c, i) => { const m = c.messages[c.messages.length - 1]; log.push({ cat: 'messages', title: chatTitle(c), text: m ? preview(m) : 'New message', t: lastTime(c) || t - i * 60000, chatId: c.id }); });
-  const pin = S.payments.filter((p) => p.dir === 'in').sort((a, b) => b.t - a.t)[0];
-  if (pin) log.push({ cat: 'payments', title: 'Payment received', text: `${money(pin.amount)} from ${pin.with}`, t: pin.t });
-  log.push({ cat: 'business', title: '2 business enquiries', text: 'Sunrise Bakery customers are asking about cake orders', t: t - 50 * MIN });
-  log.push({ cat: 'ai', title: 'AI summary available', text: 'Weekend Trip · 3 decisions and 2 pending tasks', t: t - 70 * MIN });
-  log.push({ cat: 'security', title: 'New device alert', text: 'Your account was used on WHATSMORE Web · Chrome on macOS', t: t - 3 * HOUR });
-  log.push({ cat: 'services', title: 'Electricity bill due', text: 'TSSPDCL · due in 6 days', t: t - 5 * HOUR });
-  log.push({ cat: 'community', title: 'Telangana Govt Updates', text: 'New online portal for income certificates is live', t: t - 6 * HOUR });
-  log.push({ cat: 'calls', title: 'Missed call', text: 'Ramesh Kumar · voice call', t: t - 8 * HOUR });
-  S.notifLog = log.sort((a, b) => b.t - a.t).map((n) => ({ id: uid(), read: false, ...n }));
-}
+/** The notification centre starts empty; real events are logged as they happen (logNotif). */
+export function seedNotifs() { S.notifLog = []; }
 
 /** Defaults this area needs on fresh and saved states (part of ensureV5). Returns true when something changed. */
 export function ensureModDefaults() {

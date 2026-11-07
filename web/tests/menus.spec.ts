@@ -1,7 +1,7 @@
 // Opens every item of the chat header menu, the attach menu and the message menu (closing whatever
 // it opens), plus the document studio, story viewer and demo call controls. Fails on any error.
 import { test, expect, type Page } from '@playwright/test';
-import { errorCanary, openApp } from './helpers';
+import { errorCanary, openApp, liveChatId } from './helpers';
 
 async function openChat(page: Page, id: string) {
   await page.locator('[data-act="tab"][data-tab="chats"]:visible').first().click();
@@ -26,11 +26,11 @@ async function menuLabels(page: Page, open: () => Promise<void>) {
 // Items that leave the chat or change data in ways that would break the following items
 const SKIP = /^(Clear chat|Exit group|Delete chat|Block|Delete|Report|Lock chat|Start secret chat)/;
 
-for (const chat of ['ch_trip', 'ch_siva', 'ch_bakery']) {
-  test(`every header and attach menu item works in ${chat}`, async ({ page }) => {
+for (const chat of ['live']) {
+  test(`every header and attach menu item works in the ${chat} chat`, async ({ page }) => {
     const canary = errorCanary(page);
     await openApp(page);
-    await openChat(page, chat);
+    await openChat(page, liveChatId());
     for (const [name, opener] of [
       ['header', () => page.locator('.chat-head [data-act="headmenu"]').click()],
       ['attach', () => page.locator('[data-act="attach"]').click()],
@@ -44,18 +44,18 @@ for (const chat of ['ch_trip', 'ch_siva', 'ch_bakery']) {
         // file pickers can't be driven here; anything else should open without errors
         await page.waitForTimeout(250);
         await settle(page);
-        if (!(await page.locator('#msgs').isVisible())) await openChat(page, chat);
+        if (!(await page.locator('#msgs').isVisible())) await openChat(page, liveChatId());
       }
     }
     canary.check();
   });
 }
 
-for (const chat of ['ch_siva', 'ch_trip', 'ch_project']) test(`every message menu item works in ${chat}`, async ({ page }) => {
+test('every message menu item works in the live chat', async ({ page }) => {
   test.setTimeout(180_000);
   const canary = errorCanary(page);
   await openApp(page);
-  await openChat(page, chat);
+  await openChat(page, liveChatId());
   const rows = page.locator('#msgs .msg-row');
   // one message of each kind (text, voice, document, poll, payment, …), incoming and outgoing
   const kinds = await rows.evaluateAll((els) => els.map((e) => e.className + '|' + ((e.querySelector('.pay-card,.poll,.doc,.voice,.img-wrap,.event-card,.loc,.contact-card') as HTMLElement | null)?.className.split(' ')[0] || 'text')));
@@ -83,8 +83,8 @@ for (const chat of ['ch_siva', 'ch_trip', 'ch_project']) test(`every message men
 test('document studio: open, AI proofread, close', async ({ page }) => {
   const canary = errorCanary(page);
   await openApp(page);
-  await openChat(page, 'ch_project');
-  const doc = page.locator('#msgs [data-act="opendoc"]').first();
+  await openChat(page, liveChatId());
+  const doc = page.locator('#msgs [data-act="opendoc"]').first(); // meeting-notes.txt from the other account
   await doc.click();
   await expect(page.locator('.modal, .doc-viewer').first()).toBeVisible();
   const edit = page.getByRole('button', { name: /Edit & AI-correct/ }).first();
@@ -106,18 +106,21 @@ test('story viewer: open, next, react, close', async ({ page }) => {
   await tab.first().click();
   await page.locator('[data-act="viewstatus"]').first().click();
   await expect(page.locator('.story')).toBeVisible();
-  await page.locator('[data-act="story-next"]').first().click().catch(() => {});
-  await page.locator('[data-act="story-react"]').first().click().catch(() => {});
+  await page.locator('[data-act="story-next"]').first().click({ timeout: 3000 }).catch(() => {});
+  await page.locator('[data-act="story-react"]').first().click({ timeout: 3000 }).catch(() => {});
   await page.keyboard.press('Escape');
   await expect(page.locator('.story')).toHaveCount(0);
   canary.check();
 });
 
-test('demo call: every control works', async ({ page }) => {
+test('call-link meeting: every control works', async ({ page }) => {
   const canary = errorCanary(page);
   await openApp(page);
-  await openChat(page, 'ch_trip');
-  await page.locator('.chat-head [aria-label="Video call"]').first().click();
+  const calls = page.locator('[data-act="tab"][data-tab="calls"]:visible');
+  test.skip(!(await calls.count()), 'Calls is a desktop rail tab');
+  await calls.first().click();
+  await page.locator('#sidebar [data-act="calllink"]').first().click();
+  await page.locator('.modal').getByRole('button', { name: 'Join now' }).click();
   await expect(page.locator('.call')).toBeVisible();
   await page.waitForTimeout(2500); // connects
   const acts = await page.locator('.call [data-act]').evaluateAll((els) => [...new Set(els.map((e) => (e as HTMLElement).dataset.act!))]);

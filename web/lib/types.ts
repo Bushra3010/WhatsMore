@@ -77,7 +77,7 @@ export interface Settings {
 }
 
 export interface AppState {
-  version: 1;
+  version: 2;
   me: Contact & { cloudId?: string; email?: string };
   contacts: Contact[];
   directory: Contact[];

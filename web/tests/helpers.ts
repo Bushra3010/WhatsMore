@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test';
+import { loadFixture } from './accounts';
 
 /** Collects page errors and console errors; call `check()` at the end of a test. */
 export function errorCanary(page: Page) {
@@ -16,17 +17,20 @@ export function errorCanary(page: Page) {
   return { errors, check: () => expect(errors, errors.join('\n')).toEqual([]) };
 }
 
-/** Opens the app with onboarding finished (demo mode, no account). */
-export async function openApp(page: Page, opts: { theme?: 'light' | 'dark' } = {}) {
-  await page.addInitScript(() => { try { sessionStorage.setItem('wm-welcome', '1'); } catch { /* ignore */ } });
+/** Opens the app signed in as test account A (or B), with its live chats loaded. */
+export async function openApp(page: Page, opts: { theme?: 'light' | 'dark'; as?: 'A' | 'B' } = {}) {
+  const fx = loadFixture();
+  const who = fx[opts.as || 'A'];
+  await page.addInitScript((session) => { try { localStorage.setItem('wm-app-auth', JSON.stringify(session)); } catch { /* ignore */ } }, who.session);
   await page.goto('/');
-  // first run shows the splash, then the welcome screen with the demo option
-  const skip = page.getByRole('button', { name: 'Try the demo without an account' });
-  await skip.click({ timeout: 15_000 });
-  await expect(page.locator('#onboard')).toHaveCount(0);
   await expect(page.locator('#app')).toBeVisible();
+  // the saved session is restored and the live chat with the other account syncs
+  await expect(page.locator(`#sidebar [data-act="open"][data-chat="sb_${fx.conv}"]`).first()).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('#onboard')).toHaveCount(0);
   if (opts.theme) await page.evaluate((t) => { document.documentElement.dataset.theme = t; }, opts.theme);
 }
+/** The id of the live chat between A and B in the app. */
+export const liveChatId = () => 'sb_' + loadFixture().conv;
 
 /** True when the document is wider than the viewport (horizontal page scroll). */
 export async function overflowX(page: Page) {

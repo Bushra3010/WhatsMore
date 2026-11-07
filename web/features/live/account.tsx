@@ -4,7 +4,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { S, ui, commit, useRender } from '@/lib/state';
+import { S, ui, commit, refresh, replaceState, resetUI, useRender } from '@/lib/state';
+import { makeSeed } from '@/lib/seed';
 import { modal, toast, confirmModal } from '@/lib/overlay';
 import { register, addToSlot, act } from '@/lib/registry';
 import { Icon } from '@/components/Icon';
@@ -43,11 +44,9 @@ export function cloudSignedOut() {
   onSignedOut.forEach((f) => f());
   cloudUnsubscribe();
   CL.user = null; CL.suspended = null;
-  S.chats = S.chats.filter((c) => !c.cloud);
-  S.contacts = S.contacts.filter((c) => !c.cloud);
-  delete S.me.cloudId; delete S.me.email;
-  if (ui.active?.startsWith('sb_')) ui.active = null;
-  commit();
+  // nothing of the previous account stays on this device: start from a clean state
+  replaceState(makeSeed());
+  resetUI();
 }
 
 // ---------- actions used by the onboarding / account screens (settings area)
@@ -95,6 +94,7 @@ function liveSignOut() {
 register({
   liveSignIn, liveSignUp, liveUsernameAvailable, liveResetPassword, liveSignOut,
   liveIsSignedIn: () => cloudOn(),
+  liveReady: () => authReady,
   liveEmail: () => CL.user?.email || '',
   startCloudDM,
 });
@@ -166,6 +166,8 @@ addToSlot('newchat.results', NewChatSearch);
 
 // ---------- start-up: restore a saved session; password reset links land back here
 let started = false;
+/** True once the saved session has been checked (so the app knows whether to ask for sign-in). */
+let authReady = false;
 export function startAccounts() {
   if (started) return;
   started = true;
@@ -184,8 +186,8 @@ export function startAccounts() {
     if (event === 'SIGNED_OUT' && CL.user) cloudSignedOut();
     if (event === 'TOKEN_REFRESHED' && session) CL.user = session.user;
   });
-  sb.auth.getSession().then(({ data }) => {
-    if (data.session) cloudSignedIn(data.session.user);
+  sb.auth.getSession().then(async ({ data }) => {
+    if (data.session) await cloudSignedIn(data.session.user);
     else if (S.chats.some((c) => c.cloud)) cloudSignedOut();
-  });
+  }).finally(() => { authReady = true; refresh(); });
 }

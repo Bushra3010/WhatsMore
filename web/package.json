@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "playwright test",
-    "apk": "node scripts/build-app-bundle.mjs && npx cap sync android && cd android && ./gradlew assembleRelease"
+    "apk": "NEXT_PUBLIC_ADMIN_URL=https://bushra3010.github.io/WhatsMore/admin.html node scripts/build-app-bundle.mjs && npx cap sync android && cd android && ./gradlew assembleRelease",
+    "build:pages": "WM_BASE_PATH=/WhatsMore NEXT_PUBLIC_ADMIN_URL=/WhatsMore/admin.html node scripts/build-app-bundle.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^7.1.2",

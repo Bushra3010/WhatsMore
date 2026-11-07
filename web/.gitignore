@@ -46,3 +46,6 @@ next-env.d.ts
 
 # Android app build copy (scripts/build-app-bundle.mjs)
 /.apk-build/
+
+# test accounts created per run (deleted afterwards)
+/tests/.auth/

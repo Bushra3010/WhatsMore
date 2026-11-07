@@ -82,7 +82,7 @@ export function AdminView() {
   };
   return (
     <>
-      <a className="cc-link" href="/admin" target="_blank" rel="noopener"><Icon name="dashboard" size={20} /><span className="grow"><b>Open the real Command Center</b><span>Live users, reports, verification and announcements · admins only</span></span><Icon name="chevright" size={18} /></a>
+      <a className="cc-link" href={process.env.NEXT_PUBLIC_ADMIN_URL || '/admin'} target="_blank" rel="noopener"><Icon name="dashboard" size={20} /><span className="grow"><b>Open the real Command Center</b><span>Live users, reports, verification and announcements · admins only</span></span><Icon name="chevright" size={18} /></a>
       <div className="kpi-grid">
         <Kpi label="Total users" value={n(k.users)} delta="+2.1%" id="ad-u" /><Kpi label="Active today" value={n(k.active)} delta="+4.3%" id="ad-a" /><Kpi label="Messages today" value={n(k.msgs)} id="ad-m" /><Kpi label="Calls today" value={n(k.calls)} id="ad-c" />
         <Kpi label="Businesses" value="42,560" delta="+380" /><Kpi label="Creators" value="8,920" delta="+64" /><Kpi label="Payments today" value="₹14.6 Cr" delta="+6%" /><Kpi label="System health" value="99.99%" />

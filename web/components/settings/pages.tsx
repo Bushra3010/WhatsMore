@@ -19,7 +19,6 @@ import { profileSaveHooks } from './hooks';
 import { checkUsername, ensureSettings } from './common';
 import { qrModal } from './qr';
 import { RecoverySection } from './recovery';
-import { startOnboarding } from './Onboarding';
 
 // ---------- actions
 
@@ -52,7 +51,7 @@ export function setPinModal(cb?: () => void) {
 }
 
 function resetDemo() {
-  confirmModal('Reset demo data?', 'All chats, settings and media you added will be replaced with the original demo data.', 'Reset', () => {
+  confirmModal('Clear data on this device?', 'Settings, drafts and files saved only on this device are removed. Your account and live chats are kept and load again.', 'Clear', () => {
     try { localStorage.removeItem(KEY); } catch { /* ignore */ }
     location.reload();
   });
@@ -143,8 +142,7 @@ export function SettingsTab() {
         <ActionRow act="svc" extra={{ 'data-mod': 'wellbeing' }} ic="timer" title="Digital wellbeing" sub="Screen time, focus mode, quiet hours" onClick={() => act.openView('mod:wellbeing')} />
         <ActionRow act="importchats" ic="importin" title="Import chats" sub="Bring your exported chat history from other apps" onClick={() => act.importChats()} />
         <SettingRow page="set-about" ic="info" title="About WHATSMORE" sub="More Than Chat." />
-        <ActionRow act="replayonboard" ic="person" title="Replay welcome & sign-up" sub="Splash, login, OTP and username creation" chevron={false} onClick={startOnboarding} />
-        <ActionRow act="resetdemo" ic="logout" title="Reset demo data" danger chevron={false} onClick={resetDemo} />
+        <ActionRow act="resetdemo" ic="logout" title="Clear data on this device" danger chevron={false} onClick={resetDemo} />
       </div>
     </>
   );
@@ -362,7 +360,7 @@ export function AboutPage() {
     <>
       <PageHead title="About" />
       <div className="side-scroll"><div className="about">
-        <div className="logo-big"><Logo size={72} /></div><h2>WHATSMORE</h2><p className="muted">More Than Chat. · Demo v1.0</p>
+        <div className="logo-big"><Logo size={72} /></div><h2>WHATSMORE</h2><p className="muted">More Than Chat. · Version 1.1.0</p>
         <ol className="feat-list">{FEATURES.map((f) => <li key={f}>{f}</li>)}</ol>
         <p className="muted small">CHAT + CALLS + GROUPS + STORIES + USERNAME + SECURITY + AI + CLOUD + PAYMENTS + BUSINESS</p>
       </div></div>
