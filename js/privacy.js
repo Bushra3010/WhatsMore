@@ -70,7 +70,7 @@ function screenshotDetected() {
 document.addEventListener('keyup', (e) => { if (e.key === 'PrintScreen') screenshotDetected(); });
 document.addEventListener('keydown', (e) => { if (e.metaKey && e.shiftKey && ['3', '4', '5', '#', '$', '%'].includes(e.key)) screenshotDetected(); });
 // Secret chats hide their content when the window loses focus (app switcher / screen recording)
-const secretBlur = (on) => { const ch = chatById(ui.active); main.classList.toggle('secret-hide', !!(on && ch?.secret)); };
+const secretBlur = (on) => { if (!S) return; const ch = chatById(ui.active); main.classList.toggle('secret-hide', !!(on && ch?.secret)); };
 window.addEventListener('blur', () => secretBlur(true));
 window.addEventListener('focus', () => secretBlur(false));
 document.addEventListener('visibilitychange', () => secretBlur(document.hidden));

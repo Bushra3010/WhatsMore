@@ -150,7 +150,7 @@ function scheduleCallWaiting(call) {
   call.cwT = setTimeout(() => {
     if (ui.call !== call || call.state !== 'connected' || call.cw) return;
     const busy = new Set([call.ch.id, call.held?.ch.id]);
-    const pickC = S.chats.filter((c) => c.type === 'direct' && !c.secret && !busy.has(c.id) && !contact(c.contactId)?.blocked && !contact(c.contactId)?.business);
+    const pickC = S.chats.filter((c) => c.type === 'direct' && !c.secret && !c.cloud && !busy.has(c.id) && !contact(c.contactId)?.blocked && !contact(c.contactId)?.business);
     const c = pickC.find((x) => /ananya/i.test(chatTitle(x))) || pickC[0];
     if (!c) return;
     ui.cwDone = true;

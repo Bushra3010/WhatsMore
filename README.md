@@ -101,9 +101,26 @@ Everything you do is saved in your browser. Use **Settings → Reset demo data**
 
 The logo is drawn in code (`logoSVG` in `js/settings.js`). To use the official logo artwork instead, replace that function and the favicon in `index.html`.
 
+## New in v7 (real accounts and live chats, powered by Supabase)
+
+The welcome screen now offers **Create an account**, **Sign in**, or **Try the demo without an account**.
+
+| Feature | How it works |
+|---|---|
+| **Accounts** | Sign up with your name, a unique **@username** (checked live as you type), email and password (8+ characters). There's no confirmation email, so people can start right away. You stay signed in across visits. **Forgot password?** sends a reset link. Supabase's built-in email sender only allows a few emails per hour; add your own SMTP in Supabase for more. |
+| **Find people** | **New chat** → type at least 2 letters of someone's @username or name. Real accounts appear under **WHATSMORE accounts** with a *Live* tag. |
+| **Live 1:1 chats** | Text messages are saved in Supabase and appear instantly for the other person (Supabase Realtime). |
+| **Live groups** | **New group** with people who have accounts. The creator is the admin and can add more people; there's no participant limit. A group can't mix real accounts with demo contacts. |
+| **Profile** | **Settings → Profile** saves your name, @username and about to your account. **Settings → Signed in** signs you out; demo chats stay. |
+| **Privacy** | Row-level security in the database: you can only read or send messages in conversations you belong to, you can't send as someone else, only admins can add group members, and signed-out visitors can't read anything. |
+
+**What's live and what's still demo:** only **text messages** sync between real accounts for now. Photos, voice notes, payments, polls, edits, deletes and reactions in a live chat stay on your device. Calls, stories, AI, payments and all the super-app modules are still the simulated demo, and the demo contacts and bots work as before.
+
+**Setup:** the database (tables, security rules, functions, realtime) is in [`supabase/migrations/20261108000000_accounts_and_chats.sql`](supabase/migrations/20261108000000_accounts_and_chats.sql) and is applied to the Supabase project `nkmqdkkjdrvsconphnae` (Mumbai). The app connects using the project URL and its **publishable** key in `js/cloud.js`. That key is meant to be public; the row-level security rules are what protect the data.
+
 ## Important: this is a prototype
 
-- **Other people are simulated.** Replies, typing indicators, votes and payments come from scripted bots. There is no backend and no real network messaging.
+- **Demo people are simulated.** Demo contacts' replies, typing indicators, votes and payments come from scripted bots. Real accounts (v7) send real text messages through Supabase.
 - **Encryption is shown, not implemented.** A production build would use the Signal protocol for 1:1 chats and Sender Keys for groups, with independent audits.
 - **AI and translation are rule-based.** Production would use an on-device or privacy-preserving model.
 - **Digital signatures are a demo.** A legally binding launch would use Aadhaar eSign or a DSC under the IT Act, 2000.
@@ -135,5 +152,6 @@ js/recovery.js      Account recovery: recovery key, recovery email, trusted cont
 js/superapp.js      v5: home bar & notification center, location sharing, reach controls, group live translation, meeting chat & summary, seller dashboard, DND, data & privacy, reporting, plans, admin regions/DR/AI monitoring
 js/cloudplus.js     Smart folders, links, duplicates, backup, voice status, SOS audio, Learn PDF, marketplace & admin extras
 js/onboarding.js    Splash, login/registration with OTP, username creation
+js/cloud.js         v7: Supabase accounts, @username search, live 1:1 and group chats
 js/main.js          Event wiring and startup
 ```

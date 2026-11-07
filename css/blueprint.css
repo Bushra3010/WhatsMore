@@ -191,3 +191,11 @@
 .brand-line { font-size: 13px; letter-spacing: .3px; color: var(--text-2); }
 .ob-splash { background: radial-gradient(circle at 50% 35%, rgba(26, 115, 232, .12), transparent 60%); padding: 40px 24px; border-radius: 24px; }
 .home .hello .avatar { box-shadow: 0 0 0 2px rgba(255, 255, 255, .85); }
+
+/* v7 — live accounts (Supabase) */
+.bar.cloudbar { background: #e8f1ff; color: #0f3d80; }
+[data-theme="dark"] .bar.cloudbar { background: #13284a; color: #b8d3ff; }
+.hint-box.cloud-hint { margin: 10px 12px; }
+.pill.live-acct { background: #dbeafe; color: #0f56c4; margin-left: 6px; }
+[data-theme="dark"] .pill.live-acct { background: #163563; color: #b8d3ff; }
+.btn.loading { opacity: .6; pointer-events: none; }
