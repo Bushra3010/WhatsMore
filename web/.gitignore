@@ -43,3 +43,6 @@ next-env.d.ts
 # playwright
 /test-results/
 /playwright-report/
+
+# Android app build copy (scripts/build-app-bundle.mjs)
+/.apk-build/

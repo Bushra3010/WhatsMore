@@ -17,6 +17,7 @@ import '@/components/modules';
 import '@/components/media';
 import '@/components/docs';
 import '@/features/live';
+import { isNativeApp } from '@/features/native';
 
 export function applyTheme() {
   const t = S.settings.theme;
@@ -50,7 +51,8 @@ export default function AppShell() {
     try {
       if (!sessionStorage.getItem('wm-welcome')) {
         sessionStorage.setItem('wm-welcome', '1');
-        setTimeout(() => toast('👋 Welcome to the WHATSMORE demo — everything runs locally in your browser.', null, { ms: 5000 }), 600);
+        const where = isNativeApp() ? 'on this phone' : 'in your browser';
+        setTimeout(() => toast(`👋 Welcome to the WHATSMORE demo — everything runs locally ${where}.`, null, { ms: 5000 }), 600);
       }
     } catch { /* storage unavailable */ }
     return () => { mq.removeEventListener?.('change', applyTheme); window.removeEventListener('resize', onResize); window.removeEventListener('storage', onStorage); };

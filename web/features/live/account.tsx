@@ -12,6 +12,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { profileSaveHooks } from '@/components/settings/hooks';
 import { CL, sb, cloudOn, cloudSync, cloudSubscribe, cloudUnsubscribe, onSignedOut } from './core';
 import { startCloudDM } from './send';
+import { isNativeApp } from '@/features/native';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -80,7 +81,10 @@ async function liveUsernameAvailable(u: string): Promise<boolean | null> {
 }
 async function liveResetPassword(email: string): Promise<Res> {
   if (!EMAIL.test(email)) return { error: 'Enter your email above first' };
-  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+  // inside the Android app the page lives at https://localhost, which an email link can't open, so
+  // reset links go to the website (same accounts) instead
+  const web = isNativeApp() ? (process.env.NEXT_PUBLIC_WEB_URL || 'https://bushra3010.github.io/WhatsMore/') : location.origin + location.pathname;
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: web });
   if (error) return { error: error.message };
   toast('📨 If that email has an account, a reset link is on its way (limited to a few emails per hour)', null, { ms: 6000 });
   return { ok: true };

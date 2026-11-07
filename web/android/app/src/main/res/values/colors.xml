@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#0B3D91</color>
+    <color name="colorPrimaryDark">#0B3D91</color>
+    <color name="colorAccent">#1A73E8</color>
+    <!-- WHATSMORE blue behind the status bar and the gesture bar -->
+    <color name="wm_bars">#0B3D91</color>
+</resources>

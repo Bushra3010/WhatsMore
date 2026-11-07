@@ -1,2 +1,5 @@
 .claude/
 .DS_Store
+
+# Built app files handed to clients (not committed: the repo root is published by GitHub Pages)
+/release/

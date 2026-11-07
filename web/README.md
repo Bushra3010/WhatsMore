@@ -34,3 +34,18 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Android app (APK)
+
+```bash
+npm run apk
+```
+
+Builds the app (the `/` route only, as static files; the admin panel stays on the website), syncs it into
+the Capacitor Android project in `android/`, and builds a signed release APK at
+`android/app/build/outputs/apk/release/app-release.apk`. Needs JDK 21 and the Android SDK (platform 35).
+
+- Signing key: `~/WhatsMore-android-signing/` (outside the repo; override with `WM_KEYSTORE_PROPS`).
+  Every update must be signed with the same key — keep a backup of that folder.
+- Bump `versionCode` / `versionName` in `android/app/build.gradle` for each release.
+- App icon and splash screens: `node scripts/make-android-icons.mjs`.
