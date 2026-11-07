@@ -35,7 +35,13 @@ setTimeout(v5Init, 0);
 const MORE_LANGS = ['Assamese', 'Konkani', 'Maithili', 'Manipuri', 'Nepali', 'Sanskrit', 'Sindhi', 'Santali', 'Dogri', 'Bhojpuri', 'Kashmiri', 'Afrikaans', 'Albanian', 'Amharic', 'Armenian', 'Azerbaijani', 'Basque', 'Belarusian', 'Bosnian', 'Bulgarian', 'Burmese', 'Catalan', 'Cebuano', 'Chinese (Traditional)', 'Croatian', 'Czech', 'Danish', 'Dutch', 'Esperanto', 'Estonian', 'Filipino', 'Finnish', 'Galician', 'Georgian', 'Greek', 'Haitian Creole', 'Hausa', 'Hawaiian', 'Hebrew', 'Hmong', 'Hungarian', 'Icelandic', 'Igbo', 'Indonesian', 'Irish', 'Italian', 'Javanese', 'Kazakh', 'Khmer', 'Kinyarwanda', 'Korean', 'Kurdish', 'Kyrgyz', 'Lao', 'Latin', 'Latvian', 'Lithuanian', 'Luxembourgish', 'Macedonian', 'Malagasy', 'Malay', 'Maltese', 'Maori', 'Mongolian', 'Norwegian', 'Pashto', 'Persian', 'Polish', 'Portuguese', 'Romanian', 'Russian', 'Samoan', 'Serbian', 'Sesotho', 'Shona', 'Sinhala', 'Slovak', 'Slovenian', 'Somali', 'Sundanese', 'Swahili', 'Swedish', 'Tajik', 'Tatar', 'Thai', 'Turkish', 'Turkmen', 'Ukrainian', 'Uyghur', 'Uzbek', 'Vietnamese', 'Welsh', 'Xhosa', 'Yiddish', 'Yoruba', 'Zulu'];
 MORE_LANGS.forEach((n) => { if (!LANG_LIST.some((l) => l[1] === n)) LANG_LIST.push(['x-' + n.toLowerCase().replace(/[^a-z]+/g, '-'), n]); });
 const _translateTextV5 = translateText;
-translateText = function (text, to) { const r = _translateTextV5(text, to); return r && r.text ? r : null; };
+translateText = function (text, to) {
+  const r = _translateTextV5(text, to);
+  if (r && r.text) return r;
+  // same phrase matching as live translation: spelling variants and sentence by sentence
+  const s = typeof translateSentences === 'function' ? translateSentences(text, to) : null;
+  return s ? { text: s } : null;
+};
 
 // ---------- §2 home: search, notifications, profile; greeting in your language
 const GREET = { te: ['శుభోదయం', 'శుభ మధ్యాహ్నం', 'శుభ సాయంత్రం'], hi: ['सुप्रभात', 'नमस्कार', 'शुभ संध्या'], ta: ['காலை வணக்கம்', 'மதிய வணக்கம்', 'மாலை வணக்கம்'], kn: ['ಶುಭೋದಯ', 'ಶುಭ ಮಧ್ಯಾಹ್ನ', 'ಶುಭ ಸಂಜೆ'], ml: ['സുപ്രഭാതം', 'ശുഭ ഉച്ച', 'ശുഭ സായാഹ്നം'] };
@@ -225,7 +231,7 @@ function deleteAccountModal() {
 
 // ---------- §41 reporting: users, messages, groups, businesses, channels, scams
 const REPORT_CATS = ['Spam', 'Harassment', 'Fraud', 'Impersonation', 'Illegal content', 'Security concern', 'Other'];
-function reportTargetModal({ kind, name, excerpt = '', blockable = null, leaveable = null, defaultCat = 'Spam', details = false }) {
+function reportTargetModal({ kind, name, excerpt = '', blockable = null, leaveable = null, defaultCat = 'Spam', details = false, cloud = null }) {
   modal({
     title: kind === 'scam' ? 'Report a scam or problem' : `Report ${kind === 'message' ? 'this message' : esc(name)}?`,
     body: `${excerpt ? `<div class="quote" style="--qc:var(--danger)"><div class="q-main"><div class="q-name">${esc(name)}</div><div class="q-text">${esc(excerpt)}</div></div></div>` : ''}
@@ -236,7 +242,13 @@ function reportTargetModal({ kind, name, excerpt = '', blockable = null, leaveab
       ${leaveable ? '<label class="radio-row"><input type="checkbox" id="rc-l"> Also exit this group</label>' : ''}`,
     actions: [{ label: 'Cancel' }, { label: 'Report', danger: true, onClick: (root) => {
       const cat = $('[name="rc"]:checked', root).value;
-      S.reports.push({ id: uid(), kind, name, cat, t: Date.now(), status: 'Under review' });
+      const rec = { id: uid(), kind, name, cat, t: Date.now(), status: 'Under review' };
+      S.reports.push(rec);
+      // live accounts: the report goes to the real WHATSMORE Trust & Safety queue (the Command Center)
+      if (typeof cloudOn === 'function' && cloudOn() && (cloud || kind === 'scam')) {
+        sb.from('reports').insert({ target_kind: kind, category: cat, target_label: String(name).slice(0, 120), details: $('#rc-d', root)?.value.trim() || null, ...(cloud || {}) })
+          .then(({ error }) => { rec.status = error ? 'Not sent: ' + error.message : 'Sent to Trust & Safety'; save(); if (error) toast('Report not sent: ' + error.message); });
+      }
       const adm = MS('admin', () => ({ reports: [], verif: [] }));
       (adm.reports ||= []).unshift([cat === 'Fraud' ? 'Fraud' : cat, name, `Reported by @${S.me.username} · ${kind}${excerpt ? ' · “' + excerpt.slice(0, 50) + '”' : ''}`]);
       if ($('#rc-b', root)?.checked) blockable();
@@ -249,11 +261,11 @@ function reportTargetModal({ kind, name, excerpt = '', blockable = null, leaveab
   });
 }
 reportModal = function (c) {
-  reportTargetModal({ kind: c.business ? 'business' : 'user', name: c.name, blockable: c.blocked ? null : () => { c.blocked = true; save(); if (curChat()?.contactId === c.id) { renderComposer(); renderChatSub(); } renderDrawer(); } });
+  reportTargetModal({ kind: c.business ? 'business' : 'user', name: c.name, cloud: c.cloud ? { target_user: rawId(c.id) } : null, blockable: c.blocked ? null : () => { c.blocked = true; save(); if (curChat()?.contactId === c.id) { renderComposer(); renderChatSub(); } renderDrawer(); } });
 };
 function reportMessage(ch, m) {
   const c = contact(m.from);
-  reportTargetModal({ kind: 'message', name: senderName(m.from), excerpt: preview(m), defaultCat: scamCheck(m.text || '').length ? 'Fraud' : 'Spam', blockable: ch.type === 'direct' && c && !c.blocked ? () => { c.blocked = true; save(); renderComposer(); renderChatSub(); } : null });
+  reportTargetModal({ kind: 'message', name: senderName(m.from), excerpt: preview(m), cloud: ch.cloud && m.sbId ? { target_message: m.sbId, target_conversation: ch.sbId, target_user: contact(m.from)?.cloud ? rawId(m.from) : null } : null, defaultCat: scamCheck(m.text || '').length ? 'Fraud' : 'Spam', blockable: ch.type === 'direct' && c && !c.blocked ? () => { c.blocked = true; save(); renderComposer(); renderChatSub(); } : null });
 }
 Object.assign(XA, {
   homesearch() { ui.tab = 'chats'; ui.page = null; renderRail(); renderSidebar(); setTimeout(() => $('#chat-search')?.focus(), 30); },
@@ -261,7 +273,7 @@ Object.assign(XA, {
   dldata() { downloadData(); },
   delaccount() { deleteAccountModal(); },
   reportscam() { reportTargetModal({ kind: 'scam', name: 'Scam or problem', defaultCat: 'Fraud', details: true }); },
-  reportgroup() { const ch = curChat(); reportTargetModal({ kind: 'group', name: ch.name, leaveable: () => { ch.left = true; ch.messages.push({ id: uid(), type: 'system', from: 'system', t: Date.now(), text: 'You left' }); save(); renderMessages(); renderComposer(); renderDrawer(); refreshSidebar(); } }); },
+  reportgroup() { const ch = curChat(); reportTargetModal({ kind: 'group', name: ch.name, cloud: ch.cloud ? { target_conversation: ch.sbId } : null, leaveable: () => { ch.left = true; ch.messages.push({ id: uid(), type: 'system', from: 'system', t: Date.now(), text: 'You left' }); save(); renderMessages(); renderComposer(); renderDrawer(); refreshSidebar(); } }); },
   reportchannel(el) { const c = CHANNELS.find((x) => x.id === el.dataset.c); if (c) reportTargetModal({ kind: 'channel', name: c.name, defaultCat: 'Spam' }); },
 });
 
@@ -339,7 +351,7 @@ const _modAdminV5 = MOD_RENDER.admin;
 MOD_RENDER.admin = function () {
   const dr = MS('dr', () => ({ drill: Date.now() - 12 * DAY }));
   const regions = [['🇮🇳', 'India (Mumbai + Hyderabad)', 'Primary · data stays in India', '18 ms', 'ok'], ['🌏', 'Asia (Singapore)', 'Active', '41 ms', 'ok'], ['🇪🇺', 'Europe (Frankfurt)', 'Active · GDPR residency', '96 ms', 'ok'], ['🇺🇸', 'North America (Virginia)', 'Standby', '182 ms', 'warn']];
-  return _modAdminV5()
+  return `<a class="cc-link" href="admin.html" target="_blank" rel="noopener">${icon('dashboard', 20)}<span class="grow"><b>Open the real Command Center</b><span>Live users, reports, verification and announcements · admins only</span></span>${icon('chevright', 18)}</a>` + _modAdminV5()
     + sec('Global regions', regions.map(([f, n, s, l, k]) => `<div class="set-row"><span class="big-emoji">${f}</span><div class="grow"><div class="ci-name">${n}</div><div class="ci-sub">${s} · p95 ${l}</div></div><span class="pill ${k === 'ok' ? 'ok' : 'third'}">${k === 'ok' ? 'Healthy' : 'Standby'}</span></div>`).join(''))
     + sec('Disaster recovery', `<div class="kpi-grid">${kpi('RPO target', '≤ 5 min', '')}${kpi('RTO target', '≤ 30 min', '')}${kpi('Replication lag', '1.2 s', '')}${kpi('Last backup', '14 min ago', '')}</div>
       <div class="set-row"><div class="grow"><div class="ci-name">Last failover drill</div><div class="ci-sub">${dayLabel(dr.drill)} · India → Asia in ${dr.secs || 412} s · no data loss</div></div><button class="btn sm" data-act="drdrill">Run drill</button></div>`)

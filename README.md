@@ -114,9 +114,70 @@ The welcome screen now offers **Create an account**, **Sign in**, or **Try the d
 | **Profile** | **Settings → Profile** saves your name, @username and about to your account. **Settings → Signed in** signs you out; demo chats stay. |
 | **Privacy** | Row-level security in the database: you can only read or send messages in conversations you belong to, you can't send as someone else, only admins can add group members, and signed-out visitors can't read anything. |
 
-**What's live and what's still demo:** only **text messages** sync between real accounts for now. Photos, voice notes, payments, polls, edits, deletes and reactions in a live chat stay on your device. Calls, stories, AI, payments and all the super-app modules are still the simulated demo, and the demo contacts and bots work as before.
+**What's live and what's still demo (updated in v9):** between real accounts, chats sync **everything** (text, photos, videos, voice notes, documents, stickers, GIFs, locations, polls, events, payment requests and shared contacts), and **voice/video calls and stories are real** too (see v9). **Payments use the demo wallet** — no real money moves. AI, Pay's bill/recharge flows and the super-app modules (Citizen Services, Marketplace, Learn and so on) are still the simulated demo, and the demo contacts and bots work as before.
 
 **Setup:** the database (tables, security rules, functions, realtime) is in [`supabase/migrations/20261108000000_accounts_and_chats.sql`](supabase/migrations/20261108000000_accounts_and_chats.sql) and is applied to the Supabase project `nkmqdkkjdrvsconphnae` (Mumbai). The app connects using the project URL and its **publishable** key in `js/cloud.js`. That key is meant to be public; the row-level security rules are what protect the data.
+
+## New in v8 (live chat features)
+
+| Feature | How it works |
+|---|---|
+| **Photos, videos, voice notes, documents** | Uploaded to a private Supabase Storage bucket (`chat-media`, up to 25 MB per file), in one folder per conversation. Only members of that chat can upload or download, through short-lived signed links. |
+| **Stickers, GIFs, locations** | Sent as small structured messages. |
+| **Replies** | Quote any message; the reply must point to a message in the same chat. |
+| **Edit** | Your own text messages, within 15 minutes. Everyone sees the change and an *Edited* label. |
+| **Delete for everyone** | Replaces the message for everyone and removes its file from storage. *Delete for me* still only hides it on your device. |
+| **Reactions** | One reaction per person per message; changes appear live for everyone. |
+| **Read receipts** | Blue ticks once everyone else has read your message. Turning off **Settings → Privacy → Read receipts** stops sending yours and seeing others'. |
+| **Typing and online** | "typing…", "online" and "last seen" come from Supabase Realtime (broadcast and presence). Setting **Last seen & online** to *Nobody* hides you. A failed message shows a red ⚠ instead of ticks. |
+
+The database changes are in [`supabase/migrations/20261108010000_media_receipts_reactions.sql`](supabase/migrations/20261108010000_media_receipts_reactions.sql). Editing, deleting and reacting go through checked database functions, so people can only change their own messages.
+
+## New in v9 (real calls, real stories, live polls and payments)
+
+| Feature | How it works |
+|---|---|
+| **Live polls** | Everyone's votes show up live. You can't vote in a chat you're not in. |
+| **Live events** | **Going** replies show up for everyone. No made-up RSVPs from real people. |
+| **Payment requests and split bills** | Paying, declining and "2/3 paid" totals sync. The money moves between **demo wallets** (the payer's goes down, the requester's goes up). You can't pay your own request or pay twice. **No real money moves.** |
+| **Send money** | Arrives in the other person's demo wallet. |
+| **Shared contacts** | A shared contact card works only for people with WHATSMORE accounts, and the other person can message them straight away. |
+| **Voice and video calls** | Real calls between accounts, using WebRTC. Audio and video go **directly between the two browsers**, encrypted by WebRTC (DTLS-SRTP), and never pass through Supabase. Supabase Realtime only carries the call setup. |
+| **Call features** | Incoming-call screen with ringtone, answer (or answer a video call with voice only), decline, busy, missed calls, mute, camera on/off (turn a voice call into video), switch camera and a call timer. Calls are saved to your call history. |
+| **Group calls** | Everyone who answers connects to everyone else. |
+| **Stories** | Text, photo and voice statuses are stored for **24 hours** and shown only to the audience you pick: **Everyone**, **Contacts** (people you share a chat with), **Close friends** (pick them in **Status → Close friends**) or **Only me**. *Selected contacts* currently counts as Contacts. Photos and voice notes are kept in a private bucket that only allowed viewers can read. |
+| **Status views** | You see real view counts and **Who viewed**. Replying to a status opens a live chat with the person who posted it. Deleting a status removes it for everyone. |
+
+**Limits of calls:** both people need WHATSMORE open to ring, because there are no push notifications yet. Calls use Google's public STUN servers only. A small share of networks (strict corporate or mobile-carrier networks) need a TURN relay server, which a production launch should add (for example Twilio Network Traversal, Cloudflare Calls or a self-hosted coturn). Large group calls would need a media server (SFU) rather than everyone-to-everyone.
+
+**Database:** [`20261108020000_message_actions.sql`](supabase/migrations/20261108020000_message_actions.sql) (votes, RSVPs, payments) and [`20261108030000_stories.sql`](supabase/migrations/20261108030000_stories.sql) (statuses, close friends, views, `status-media` bucket).
+
+## New in v10 (the real admin panel: Command Center)
+
+Open **`admin.html`** on the live site (for example `https://bushra3010.github.io/WhatsMore/admin.html`) and sign in with a WHATSMORE account that is on the admin list. Anyone else sees "This account is not an admin". The database refuses every admin action from them too, not just the page.
+
+| Page | What admins can do |
+|---|---|
+| **Dashboard** | Real numbers: users, sign-ups today and this week, active and signed-in users, messages, chats and groups, live statuses, files and storage, open reports, verification requests, suspended and verified accounts. Two 14-day charts (sign-ups, messages) in the admin's own time zone, with a table view, plus messages by type. |
+| **Users** | Search by name, @username or email. See joined date, last sign-in, messages, chats and open reports. Give or remove a badge (Verified, Business, Creator, Official, Government). Suspend for 1, 7 or 30 days or indefinitely, with a reason. Unsuspend. Delete an account (owner only, after typing the username). |
+| **Reports** | Reports filed in the app (users, businesses, messages, groups, scams) arrive here with the reported message. Choose **Dismiss**, **Remove message** (it disappears for everyone), **Suspend 7 days** or both. Filter by Open, Actioned, Dismissed or All. |
+| **Verification** | Badge requests from **Settings → Profile → Request a badge**. Approve (the badge appears next to the person's name) or reject. |
+| **Statuses** | Every live status, with the option to remove one for everyone. |
+| **Announcements** | Publish an Information, Warning or Critical notice. It appears as a banner at the top of WHATSMORE for everyone signed in, until you end it. |
+| **Audit log** | Every admin action, with who did it and to whom. It can't be edited. |
+| **Admins** | (Owner only) Add moderators or owners by @username, or remove them. |
+
+**What users see:** badges next to names, and a clear notice when suspended (date and reason; they can read but can't send, post or start chats). The database enforces the suspension, so it can't be bypassed. Announcements appear as banners. Their reports go to the real queue (**Settings → Your data & privacy → My reports** shows *Sent to Trust & Safety*).
+
+**Privacy:** a person's suspension date and reason are visible only to them and to admins. Admins see a reported message's content only because someone reported it; they can't browse private chats.
+
+**First admin:** create your account in WHATSMORE, then the project owner adds it once in the Supabase SQL editor (replace the email):
+
+```sql
+insert into public.admins (user_id, role) select id, 'owner' from auth.users where email = 'you@example.com';
+```
+
+After that, add more admins from the **Admins** page. The database is in [`20261108040000_admin.sql`](supabase/migrations/20261108040000_admin.sql) and [`20261108050000_admin_fixes.sql`](supabase/migrations/20261108050000_admin_fixes.sql).
 
 ## Important: this is a prototype
 
@@ -153,5 +214,9 @@ js/superapp.js      v5: home bar & notification center, location sharing, reach 
 js/cloudplus.js     Smart folders, links, duplicates, backup, voice status, SOS audio, Learn PDF, marketplace & admin extras
 js/onboarding.js    Splash, login/registration with OTP, username creation
 js/cloud.js         v7: Supabase accounts, @username search, live 1:1 and group chats
+js/rtc.js           v9: real voice/video calls (WebRTC, Supabase Realtime signalling)
+js/stories.js       v9: real 24-hour stories with audiences, close friends and view counts
+js/moderation.js    v10: suspension notices, announcements, badges and badge requests in the app
+js/admin.js         v10: the Command Center admin panel (admin.html, css/admin.css)
 js/main.js          Event wiring and startup
 ```

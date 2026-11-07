@@ -368,3 +368,6 @@
 .prod .ci-sub .ic, .vbadge .ic { display: inline-block; vertical-align: -2px; }
 @media (max-width: 760px) { .prod-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } .prod .prod-art.big { height: 90px; } .prod-acts { flex-direction: column; } }
 .set-row > .avatar:first-child, .set-row > .date-chip:first-child, .set-row > .mod-ic:first-child { flex: none; }
+
+/* QA fix: text boxes inside cards leave room for the card margins (was 16-19px too wide) */
+.vsec > .ta, .vsec > textarea { width: calc(100% - 32px); display: block; margin-bottom: 10px; }

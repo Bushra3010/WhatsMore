@@ -186,7 +186,8 @@ function chatAvatar(ch, size = 49) {
   if (ch.type === 'direct') return avatarHTML(contact(ch.contactId), size);
   return avatarHTML({ name: ch.name, emoji: ch.emoji, color: ch.color }, size, 'group');
 }
-const verifiedHTML = (c) => (c?.business?.verified ? `<span class="verified" title="Verified business">${icon('verified', 16)}</span>` : '');
+const BADGE_LABELS = { verified: 'Verified', business: 'Business verified', creator: 'Creator verified', official: 'Official', government: 'Government' };
+const verifiedHTML = (c) => (c?.badge ? `<span class="verified badge-${c.badge}" title="${BADGE_LABELS[c.badge] || 'Verified'}">${icon('verified', 16)}</span>` : c?.business?.verified ? `<span class="verified" title="Verified business">${icon('verified', 16)}</span>` : '');
 
 function preview(m) {
   if (!m) return '';
@@ -213,6 +214,7 @@ function preview(m) {
   return '';
 }
 function ticks(st) {
+  if (st === 'failed') return `<span class="tick failed" title="Not sent">${icon('warning', 15)}</span>`;
   if (st === 'read') return `<span class="tick read">${icon('doneall', 16)}</span>`;
   if (st === 'delivered') return `<span class="tick">${icon('doneall', 16)}</span>`;
   return `<span class="tick">${icon('check', 16)}</span>`;

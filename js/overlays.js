@@ -181,7 +181,8 @@ function addStatusModal() {
         else { if (!photo) { toast('Choose a photo'); return false; } item = { type: 'image', src: photo, caption: $('#st-cap', root).value.trim(), t, privacy, views: 0 }; }
         S.myStatus.items.push(item);
         save(); renderSidebar(); toast('Status posted · ' + privacyLabel(privacy));
-        [3000, 7000, 12000].forEach((d) => setTimeout(() => { if (privacy !== 'private') { item.views++; save(); } }, d));
+        // demo-only simulated views; signed-in accounts get real view counts from Supabase
+        if (!(typeof cloudOn === 'function' && cloudOn())) [3000, 7000, 12000].forEach((d) => setTimeout(() => { if (privacy !== 'private') { item.views++; save(); } }, d));
       },
     }],
     onMount: (root) => root.addEventListener('click', async (e) => {
