@@ -63,6 +63,8 @@ export function AdminShell({ me, children }: { me: Admin; children: ReactNode })
               {counts[k] ? <span className="count">{counts[k]}</span> : null}
             </Link>
           ))}
+          {/* phones hide the signed-in box below, so Sign out also sits at the end of the nav row */}
+          <a href="#" className="nav-item phone-only" onClick={signOut}>Sign out</a>
           <div className="grow" />
           <div className="who">
             {me.name || ''} · @{me.username || ''}

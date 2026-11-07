@@ -90,7 +90,7 @@ function applyReads(ch) {
   if (!ch?.cloud) return;
   const others = ch.type === 'direct' ? [ch.contactId] : ch.members;
   const upTo = S.settings.privacy.readReceipts && others.length ? Math.min(...others.map((id) => ch.readBy?.[id] || 0)) : 0;
-  ch.messages.forEach((m) => { if (m.from === 'me' && m.sbId && m.status !== 'failed' && m.status !== 'sent') m.status = m.t <= upTo ? 'read' : 'delivered'; });
+  ch.messages.forEach((m) => { if (m.from === 'me' && m.sbId && m.type !== 'payment' && m.status !== 'failed' && m.status !== 'sent') m.status = m.t <= upTo ? 'read' : 'delivered'; });
 }
 
 // ---------- full sync: my conversations, members, recent messages, reactions and files
@@ -283,7 +283,8 @@ sendMsg = function (ch, partial, opts) {
   }
   const sid = crypto.randomUUID();
   const oldId = m.id;
-  m.id = 'sm_' + sid; m.sbId = sid; m.status = 'sent';
+  // payment messages keep their own status (pending / paid / declined) instead of delivery ticks
+  m.id = 'sm_' + sid; m.sbId = sid; if (kind !== 'payment') m.status = 'sent';
   if (ui.replyTo === oldId) ui.replyTo = m.id;
   const reply_to = m.replyTo?.startsWith('sm_') ? rawId(m.replyTo) : null;
   refreshMsg(ch);
@@ -303,7 +304,7 @@ sendMsg = function (ch, partial, opts) {
     }
     const { data, error } = await sb.from('messages').insert({ id: sid, conversation_id: ch.sbId, reply_to, ...row }).select('created_at').single();
     if (error) throw error;
-    m.t = Date.parse(data.created_at); m.status = 'delivered';
+    m.t = Date.parse(data.created_at); if (kind !== 'payment') m.status = 'delivered';
     applyReads(ch); refreshMsg(ch);
   })().catch((err) => {
     m.status = 'failed'; refreshMsg(ch);

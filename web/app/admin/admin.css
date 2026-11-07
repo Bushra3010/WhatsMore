@@ -50,6 +50,7 @@ a { color: var(--accent-text); }
 .nav .brand-row { padding: 4px 8px 14px; font-weight: 700; }
 .nav .nav-item { text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; text-align: left; border: 0; background: none; padding: 9px 12px; border-radius: 10px; cursor: pointer; color: var(--text-2); font-weight: 600; }
 .nav .nav-item:hover { background: var(--panel-2); color: var(--text); }
+.nav .phone-only { display: none; }
 .nav .nav-item.on { background: var(--accent-soft); color: var(--accent-text); }
 .nav .count { background: var(--bad); color: #fff; font-size: 11px; border-radius: 9px; padding: 1px 7px; }
 .nav .grow { flex: 1; }
@@ -132,6 +133,7 @@ tr:last-child td { border-bottom: 0; }
   .nav { position: static; height: auto; flex-direction: row; overflow-x: auto; padding: 8px; gap: 2px; border-right: 0; border-bottom: 1px solid var(--border); }
   .nav .brand-row, .nav .grow, .nav .who { display: none; }
   .nav .nav-item { width: auto; flex: none; padding: 8px 10px; }
+  .nav .phone-only { display: flex; }
   .cc-main { padding: 16px; }
   .cc-kpi b { font-size: 22px; }
   .grid2 { grid-template-columns: 1fr; }

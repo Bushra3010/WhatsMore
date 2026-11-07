@@ -280,6 +280,64 @@ test('B reports a message; A (as admin) sees it, suspends B, and B cannot send',
   // audit log recorded the suspension
   await adm.goto(base + '/admin/audit');
   await expect(adm.locator('body')).toContainText(/suspend/i, { timeout: 15_000 });
+  // report actions: remove the reported message for everyone
+  await adm.goto(base + '/admin/reports');
+  await adm.getByRole('button', { name: 'Remove message' }).first().click();
+  await expect(adm.getByText('Message removed for everyone')).toBeVisible({ timeout: 15_000 });
+  await expect(b.locator('#msgs')).not.toContainText('Fixed message', { timeout: 20_000 });
+
+  // unsuspend: B can send again
+  await adm.goto(base + '/admin/users');
+  await adm.locator('input[type="search"], input[placeholder*="earch"]').first().fill(B.un);
+  const urow = adm.locator('tr', { hasText: '@' + B.un }).first();
+  await urow.getByRole('button', { name: 'Unsuspend' }).click();
+  await expect(urow.getByRole('button', { name: 'Suspend' })).toBeVisible({ timeout: 15_000 });
+  await b.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await expect(b.getByText(/no longer suspended/i)).toBeVisible({ timeout: 20_000 });
+  await send(b, 'Back again');
+  await expect(rowWith(a, 'Back again')).toBeVisible({ timeout: 20_000 });
+
+  // badges from the Users page reach the person
+  await urow.getByRole('combobox').selectOption('creator');
+  await expect(adm.getByText(/is now Creator verified/)).toBeVisible({ timeout: 15_000 });
+  await b.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await expect(b.getByText(/You're now Creator verified/)).toBeVisible({ timeout: 20_000 });
+
+  // admins: add B as moderator, then remove (with confirmation)
+  await adm.goto(base + '/admin/admins');
+  await adm.getByLabel('Username').fill('@' + B.un);
+  await adm.getByRole('button', { name: 'Add' }).click();
+  const arow = adm.locator('tr', { hasText: '@' + B.un });
+  await expect(arow).toContainText('Moderator', { timeout: 15_000 });
+  await arow.getByRole('button', { name: 'Remove' }).click();
+  await adm.locator('[role="dialog"]').getByRole('button', { name: 'Remove' }).click();
+  await expect(arow).toHaveCount(0, { timeout: 15_000 });
+
+  // owner deletes B's account (typed confirmation); B's files go first so nothing is left in storage
+  const bFiles = sql(`select bucket_id, name from storage.objects where owner_id = (select id::text from auth.users where email = '${B.email}')`) as { bucket_id: string; name: string }[];
+  if (bFiles.length) await b.evaluate(async ({ files, url, key }) => {
+    const token = JSON.parse(localStorage.getItem('wm-app-auth') || '{}').access_token;
+    for (const bucket of new Set(files.map((f) => f.bucket_id))) await fetch(`${url}/storage/v1/object/${bucket}`, { method: 'DELETE', headers: { apikey: key, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ prefixes: files.filter((f) => f.bucket_id === bucket).map((f) => f.name) }) });
+  }, { files: bFiles, url: SUPABASE_URL, key: SUPABASE_KEY });
+  await adm.goto(base + '/admin/users');
+  await adm.locator('input[type="search"], input[placeholder*="earch"]').first().fill(B.un);
+  await adm.locator('tr', { hasText: '@' + B.un }).first().getByRole('button', { name: 'Delete' }).click();
+  const dlg = adm.locator('[role="dialog"]');
+  await dlg.locator('input[name="confirm"]').fill(B.un);
+  await dlg.getByRole('button', { name: 'Delete account' }).click();
+  await expect(adm.getByText(`@${B.un} deleted`)).toBeVisible({ timeout: 15_000 });
+  expect(sql(`select count(*)::int n from auth.users where email = '${B.email}'`)[0].n).toBe(0);
+
+  // phone width: every admin page fits, and Sign out is reachable
+  await adm.setViewportSize({ width: 375, height: 812 });
+  for (const s of ['dashboard', 'users', 'reports', 'verification', 'statuses', 'announcements', 'audit', 'admins']) {
+    await adm.goto(base + '/admin/' + s);
+    await expect(adm.locator('h1, h2').first()).toBeVisible();
+    expect(await adm.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1), `admin ${s} overflows at 375px`).toBe(false);
+  }
+  await adm.getByRole('link', { name: 'Sign out' }).click();
+  await expect(adm).toHaveURL(/\/admin\/login/, { timeout: 15_000 });
+
   canAdm.check();
 });
 

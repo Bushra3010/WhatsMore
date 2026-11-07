@@ -1,6 +1,6 @@
 'use client';
 import { Topbar, useAdmin } from './AdminShell';
-import { toast } from './feedback';
+import { dialog, toast } from './feedback';
 import { when } from './format';
 import { useLoad } from './useLoad';
 import { rpc } from './rpc';
@@ -26,6 +26,8 @@ export function Admins() {
   };
 
   const remove = async (a: AdminRow) => {
+    const who = a.username ? '@' + a.username : a.name || 'this admin';
+    if (!(await dialog({ title: `Remove ${who} as admin?`, ok: 'Remove', danger: true, body: <p className="muted">They lose access to the Command Center straight away. Their WHATSMORE account is not affected.</p> }))) return;
     try { await rpc('admin_set_admin', { u: a.user_id, r: '' }); toast('Admin removed'); load(); } catch { /* shown */ }
   };
 
