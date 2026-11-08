@@ -3,10 +3,11 @@
 Chat, calls, stories, AI, Pay, business, marketplace, services and community in one app, with the
 WHATSMORE brand (a tricolour “W” on a blue theme).
 
-- **Website:** https://bushra3010.github.io/WhatsMore/ (built from `web/` by `.github/workflows/pages.yml`)
+- **App + admin panel on Vercel:** https://whatsmore-pi.vercel.app (admin: https://whatsmore-pi.vercel.app/admin).
+  Vercel project `whatsmore` (account whatsmore5997-8000), root `web/`; deploy with `vercel deploy --prod` from `web/`.
+- **App on GitHub Pages:** https://bushra3010.github.io/WhatsMore/ (static build of `web/` by `.github/workflows/pages.yml`
+  on every push to main; the old admin page is still at `/WhatsMore/admin.html`).
 - **Android app:** `cd web && npm run apk` (see `web/README.md`)
-- **Admin panel (Command Center):** `web/app/admin` (needs a server, e.g. Vercel). Until then the older
-  admin page is published at `/WhatsMore/admin.html`.
 
 A WHATSMORE account is required: people, chats, stories and calls are real (Supabase accounts, live
 database, realtime and WebRTC calls). There is no built-in demo data. The service sections show sample

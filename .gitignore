@@ -3,3 +3,6 @@
 
 # Built app files handed to clients (not committed: the repo root is published by GitHub Pages)
 /release/
+
+# Supabase CLI working files
+supabase/.temp/

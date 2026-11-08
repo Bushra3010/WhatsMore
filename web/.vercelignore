@@ -1,0 +1,7 @@
+# Not needed to build or run the website on Vercel
+android
+.apk-build
+tests
+test-results
+playwright-report
+scripts
